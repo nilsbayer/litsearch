@@ -14,6 +14,9 @@ import re
 import math
 import time
 
+if not os.path.exists(os.path.join("pdfs")):
+    os.mkdir("pdfs")
+
 app = Flask(__name__)
 
 load_dotenv(find_dotenv())
@@ -164,10 +167,10 @@ def subject_search():
         following_sentences = top_sentence + 5
         if following_sentences:
             to_send = all_text_together_sentences[top_sentence:following_sentences]
-            to_send = " ".join(to_send)
+            to_send = ". ".join(to_send)
         else:
             to_send = all_text_together_sentences[top_sentence:]
-            to_send = " ".join(to_send)
+            to_send = ". ".join(to_send)
 
         return jsonify({"text": to_send})
 
