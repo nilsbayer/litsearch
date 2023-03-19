@@ -32,6 +32,7 @@ subjectSearcher.addEventListener("keyup", () => {
         response.json().then(data => {
             document.getElementById("loading-div").innerHTML = ""
             subjectResult.innerText = data.text
+            subjectResult.style.display = "block"
         })
     })
 

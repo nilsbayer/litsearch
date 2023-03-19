@@ -34,7 +34,13 @@ h3 {
 
 #subject-result {
     margin-top: 2rem;
+    padding: 1rem;
+    background-color: #F3F3F3;
+    color: #6D6D6D;
+    border-radius: 5px;
+    display: none;
 }
+
 
 #loading-div {
     display: none;

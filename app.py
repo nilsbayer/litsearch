@@ -24,8 +24,8 @@ app.config["SECRET_KEY"] = os.getenv("APP_PWD")
 
 # Forms
 class FileUploadForm(FlaskForm):
-    files = MultipleFileField('Bild dieser Station', validators=[FileAllowed(["pdf"], 'PDFs only!')])
-    submit = SubmitField("Speichern")
+    files = MultipleFileField('PDF', validators=[FileAllowed(["pdf"], 'PDFs only!')])
+    submit = SubmitField("Analyze PDF")
 
 sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
