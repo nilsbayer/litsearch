@@ -1,0 +1,36 @@
+h1 {
+    margin-bottom: 0;
+}
+
+.headline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 4rem;
+}
+
+.h3-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.copy-icon {
+    cursor: pointer;
+}
+
+.copy-icon:hover {
+    animation: up_n_down .6s;
+}
+
+@keyframes up_n_down {
+    50% {
+        transform: translateY(-10%);
+    }
+}   

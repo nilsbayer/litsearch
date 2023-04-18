@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, url_for, redirect, request
+from flask import Flask, jsonify, render_template, url_for, redirect, request, abort
 import os
 import PyPDF2
 import requests
@@ -161,6 +161,27 @@ def create_survey():
         return redirect("index")
     else:
         return render_template("create_survey.html", form=form)
+
+@app.route("/paper/<string:paper_token>")
+def get_paper(paper_token):
+    if not paper_token:
+        print("no token set")
+        abort(404)
+    paper = {
+        "title": "Attention is all you need",
+        "summary": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo? Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo",
+        "APA_citation": "Gomez & Bayer, Attention is all you need, 2020, Journal of Love, Reutlingen",
+        "similar_papers": [
+            {
+                "title": "Transformers",
+                "link": "http://localhost:5000/paper/ABC"
+            }
+        ],
+        "tags": ["Artificial Intelligence"],
+        "link_pdf": "https://arxiv.org/pdf/1706.03762.pdf",
+        "pdf_provider": "arxiv.org"
+    }
+    return render_template("paper.html", paper=paper)
 
 topics = ["Artificial Intelligence", "Sustainability", "Medicine", "Marketing", "Finance", "Accounting", "Mechanical Engineering"]
 papers = ["Attention is all you need", "Machine learning in medicine", "The power of linear regression"]
