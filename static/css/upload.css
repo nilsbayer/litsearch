@@ -1,0 +1,43 @@
+h1 {
+    padding: 0 0 2rem 0;
+}
+
+#files {
+    display: none;
+}
+
+.btns {
+    display: flex;
+    gap: 1rem;
+}
+
+.circle {
+    width: 10rem;
+    height: 10rem;
+    background-color: var(--lightgrey);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color .2s;
+}
+.circle:hover {
+    background-color: var(--hovergrey);
+}
+
+.plus {
+    width: 5rem;
+    height: 1rem;
+    background-color: white;
+    border-radius: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.vertical {
+    transform: translate(-50%, -50%) rotate(90deg);
+}

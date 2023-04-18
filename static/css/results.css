@@ -1,0 +1,46 @@
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+.paper-result {
+    padding: 2rem;
+    width: 75vw;
+    background-color: rgba(224, 224, 224, 0.3);
+    transition: all .1s;
+    border-radius: 10px;
+}
+
+.paper-result p, span {
+    color: #3D6C8D;
+    transition: all .1s;
+    text-decoration: none;
+}
+
+.paper-result:hover p {
+    padding: 0 0 1rem 0;
+    color:#3D6C8D;
+}
+
+.paper-result span {
+    opacity: 0;
+    display: block;
+    text-align: right;
+    font-weight: bolder;
+}
+
+.paper-result p {
+    transition: padding .2s;
+    line-height: 1.5rem;
+    color: #6D6D6D;
+}
+
+.paper-result:hover {
+    background-color: rgba(61, 108, 141, 0.2);
+}
+
+.paper-result:hover span {
+    opacity: 1;
+}

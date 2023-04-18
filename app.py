@@ -1,9 +1,4 @@
 from flask import Flask, jsonify, render_template, url_for, redirect, request
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from flask_wtf.file import FileAllowed, FileRequired, FileField
-from wtforms.fields import MultipleFileField
-from wtforms.validators import DataRequired, Length, ValidationError, EqualTo, Email
 import os
 import PyPDF2
 import requests
@@ -22,10 +17,7 @@ app = Flask(__name__)
 load_dotenv(find_dotenv())
 app.config["SECRET_KEY"] = os.getenv("APP_PWD")
 
-# Forms
-class FileUploadForm(FlaskForm):
-    files = MultipleFileField('PDF', validators=[FileAllowed(["pdf"], 'PDFs only!')])
-    submit = SubmitField("Analyze PDF")
+from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm
 
 sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -65,9 +57,46 @@ def get_pdf_text(pdf_path):
 all_text_together = ""
 emb_sentences = []
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    form = SubjectSearchForm()
+    args = request.args
+    if len(args.getlist("search")) > 0:
+        results = [
+            {
+                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
+                "authors": "Gomez & Bayer",
+                "year": str(2020),
+                "title": "Attention is all we need baby"
+            },
+            {
+                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
+                "authors": "Gomez & Bayer",
+                "year": str(2020),
+                "title": "Attention is all we need baby"
+            },
+            {
+                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
+                "authors": "Gomez & Bayer",
+                "year": str(2020),
+                "title": "Attention is all we need baby"
+            },
+            {
+                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
+                "authors": "Gomez & Bayer",
+                "year": str(2020),
+                "title": "Attention is all we need baby"
+            },
+            {
+                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
+                "authors": "Gomez & Bayer",
+                "year": str(2020),
+                "title": "Attention is all we need baby"
+            }
+        ]
+        return render_template("results.html", results=results)
+    else:
+        return render_template("index.html", form=form)
 
 @app.route("/upload-your-paper", methods=["POST", "GET"])
 def upload():
@@ -123,6 +152,15 @@ def upload():
 
         return render_template("custom_paper.html", total_text = all_text_together, tags=tags, summary=summary)
     return render_template("upload.html", form=form)
+
+@app.route("/create-survey", methods=["POST", "GET"])
+def create_survey():
+    form = SurveyCreationForm()
+    if form.validate_on_submit():
+        print("******* YEEES")
+        return redirect("index")
+    else:
+        return render_template("create_survey.html", form=form)
 
 topics = ["Artificial Intelligence", "Sustainability", "Medicine", "Marketing", "Finance", "Accounting", "Mechanical Engineering"]
 papers = ["Attention is all you need", "Machine learning in medicine", "The power of linear regression"]

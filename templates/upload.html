@@ -6,16 +6,39 @@
 {% endblock extended_head %}
 
 {% block dynamic_content %}
-    <h1>Uplaod your paper here</h1>
+    <h1>We summarize your papers and recommend similar literature </h1>
+    <div class="btns">
+        <span class="btn prim-btn">Upload PDF</span>
+        <span class="btn sec-btn">Share URL to PDF</span>
+        <span class="btn sec-btn">Paste text here</span>
+    </div>
     <form id="upload-form" action="" method="POST" enctype="multipart/form-data">
         {{ form.csrf_token }}
         <label>
-            <span></span>
+            <div class="circle">
+                <div class="plus horizontal"></div>
+                <div class="plus vertical"></div>
+            </div>
             {{ form.files }}
         </label>
-        {{ form.submit }}
         {% for error in form.files.errors %}
             <div>{{ error }}}</div>
         {% endfor %}
     </form>
+
+    <script>
+        document.getElementById("files").addEventListener("change", () => {
+            document.getElementById("upload-form").submit()
+        })
+
+        document.querySelectorAll(".btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                let primBtn = document.querySelector("span.prim-btn")
+                primBtn.classList.remove("prim-btn")
+                primBtn.classList.add("sec-btn")
+                btn.classList.remove("sec-btn")
+                btn.classList.add("prim-btn")
+            })
+        })
+    </script>
 {% endblock dynamic_content %}

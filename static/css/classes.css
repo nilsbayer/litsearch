@@ -1,3 +1,8 @@
+* {
+    --lightgrey: rgba(224, 224, 224, 0.38);
+    --hovergrey: rgba(224, 224, 224, 0.6);
+}
+
 input[type="text"] {
     padding: .5rem 1rem;
     width: 30vw;
@@ -7,4 +12,74 @@ input[type="text"] {
     border-radius: 5px;
     color: #6D6D6D;
     height: 2rem;
+}
+
+textarea {
+    padding: 1rem 1rem;
+    width: 40vw;
+    height: 20vh;
+    outline: none;
+    border: none;
+    background-color: rgba(224, 224, 224, 0.38);
+    border-radius: 5px;
+    color: #6D6D6D;
+    resize: none;
+}
+
+.prim-btn {
+    padding: .5rem 1rem;
+    background-color: #3D6C8D;
+    color: white;
+    border-radius: 5px;
+    font-size: .8rem;
+    width: fit-content;
+    cursor: pointer;
+    transition: background-color .1s;
+    border: none;
+}
+
+.prim-btn:hover {
+    background-color: #315976;
+}
+
+.sec-btn {
+    padding: .5rem 1rem;
+    background-color: rgba(224, 224, 224, 0.3);
+    border-radius: 5px;
+    font-size: .8rem;
+    width: fit-content;
+    cursor: pointer;
+    transition: background-color .1s;
+    border: none;
+}
+
+.sec-btn:hover {
+    background-color: rgba(224, 224, 224, 0.6);
+}
+
+.error-div {
+    position: fixed;
+    top: 85vh;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 8vh;
+    width: 30vw;
+    background-color: white;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(206, 3, 3);
+    animation: come-up .5s;
+    transition: top .5s;
+}
+
+@keyframes come-up {
+    from {
+        top: 110vh;
+    }
+    to {
+        top: 85vh;
+    }
 }
