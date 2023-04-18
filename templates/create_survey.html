@@ -2,6 +2,7 @@
 
 {% block extended_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/start_project.css')}}">
+<script src="{{ url_for('static', filename='js/start_project.js') }}" defer></script>
 {% endblock extended_head %}
 
 {% block dynamic_content %}
@@ -19,44 +20,4 @@
         </form>
     </div>
 </main>
-
-<script>
-    document.getElementById("next").addEventListener("click", () => {
-        if (document.getElementById("name").value === "") {
-            let errorDiv = document.createElement("div")
-            errorDiv.innerHTML = "Please name the project"
-            errorDiv.classList.add("error-div")
-            document.body.append(errorDiv)
-            setTimeout(() => {
-                errorDiv.style.top = "110vh"
-                setTimeout(() => {
-                    errorDiv.remove()
-                }, 500)
-            }, 4500)
-        }
-        else {
-            document.getElementById("description").style.display = "inline"
-            document.getElementById("back").style.display = "inline"
-            document.getElementById("name").style.display = "none"
-            document.getElementById("next").style.display = "none"
-            document.getElementById("submit").style.display = "inline"
-            document.querySelector("h1").innerText = "Describe what you want to investigate, thus we can propose some sample questions."
-        }
-    })
-
-    document.getElementById("back").addEventListener("click", () => {
-        document.getElementById("description").style.display = "none"
-        document.getElementById("back").style.display = "none"
-        document.getElementById("name").style.display = "inline"
-        document.getElementById("next").style.display = "inline"
-        document.getElementById("submit").style.display = "none"
-        document.querySelector("h1").innerText = "Create a survey & easy data analysis"
-    })
-
-    document.getElementById("name").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault()
-        }
-    })
-</script>
 {% endblock dynamic_content %}
