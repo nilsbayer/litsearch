@@ -14,5 +14,11 @@ function success_message (copy_text) {
     }, 4500)
 }
 
-copySummary.addEventListener("click", success_message("Summary was copied successfully to your clipboard"))
-copyCitation.addEventListener("click", success_message("Citation was copied successfully to your clipboard"))
+copySummary.addEventListener("click", () => {
+    navigator.clipboard.writeText(document.getElementById("summary").innerText);
+    success_message("Summary was copied successfully to your clipboard")
+})
+copyCitation.addEventListener("click", () => {
+    navigator.clipboard.writeText(document.getElementById("citation").innerText);
+    success_message("Citation was copied successfully to your clipboard")
+})
