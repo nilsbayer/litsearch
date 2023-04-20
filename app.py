@@ -162,6 +162,38 @@ def create_survey():
     else:
         return render_template("create_survey.html", form=form)
 
+@app.route("/project/<string:project_token>")
+def get_project(project_token):
+    project = {
+        "title": "Bachelor Thesis ESB",
+        "found_papers": [
+            {
+                "title": "Attention is all you need",
+                "explanatory_paragraph": "lorem ipsum...",
+                "link": "http://localhost:5000/paper/asd"
+            },
+            {
+                "title": "Attention is all you need",
+                "explanatory_paragraph": "lorem ipsum...",
+                "link": "http://localhost:5000/paper/asd"
+            },
+            {
+                "title": "Attention is all you need",
+                "explanatory_paragraph": "lorem ipsum...",
+                "link": "http://localhost:5000/paper/asd"
+            }
+        ],
+        "description": "I want to investigate ...",
+        "literature": [
+            {
+                "title": "Successfull business leaders",
+                "explanatory_paragraph": "lorem ipsum...",
+                "link": "http://localhost:5000/paper/asd"
+            }
+        ]
+    }
+    return render_template("project.html", project=project)
+
 @app.route("/paper/<string:paper_token>")
 def get_paper(paper_token):
     if not paper_token:

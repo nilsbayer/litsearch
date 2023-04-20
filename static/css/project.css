@@ -1,0 +1,17 @@
+.found-paper {
+    background-color: var(--lightgrey);
+    border-radius: 10px;
+    width: 80%;
+    padding: .5rem 1rem;
+    margin: .5rem 0;
+}
+
+.found-paper span {
+    color: #3D6C8D;
+    font-weight: bolder;
+    font-size: 1rem; 
+}
+
+.btns {
+    margin-top: 2rem;
+}
