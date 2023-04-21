@@ -274,6 +274,19 @@ def encode_text():
     print("Done encoding")
     return "okay"
 
+# Asyncronous routes
+@app.route("/get-projects-papers", methods=["POST"])
+def get_projects_papers():
+
+    saved_papers = [
+        {
+            "distance": 3.78,
+            "title": "Attention is all you need",
+            "token": "asd"
+        }
+    ]
+    return jsonify({"saved_papers": saved_papers})
+
 
 if __name__ == "__main__":
     app.run()
