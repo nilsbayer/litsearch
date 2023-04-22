@@ -8,13 +8,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_URL=postgresql://postgres:postgres@flask_db:5432/postgres
       - APP_PWD=passwort1!
-    depends_on:
-      - flask_db
+    #   - DB_URL=postgresql://postgres:postgres@flask_db:5432/postgres
+    # depends_on:
+    #   - flask_db
     command: gunicorn -w 3 -b 0.0.0.0:8000 wsgi:app
-    volumes:
-      - flask_app_data:/app/data
+    # volumes:
+    #   - flask_app_data:/app/data
   
   nginx:
     container_name: nginx

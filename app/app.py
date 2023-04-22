@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, url_for, redirect, request, abort
+from flask import Flask, jsonify, render_template, url_for, redirect, request, abort, send_from_directory
 import os
 import PyPDF2
 import requests
@@ -12,7 +12,7 @@ import time
 if not os.path.exists(os.path.join("pdfs")):
     os.mkdir("pdfs")
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/")
 
 load_dotenv(find_dotenv())
 app.config["SECRET_KEY"] = os.getenv("APP_PWD")
@@ -56,6 +56,10 @@ def get_pdf_text(pdf_path):
 
 all_text_together = ""
 emb_sentences = []
+
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
 
 @app.route("/", methods=["GET"])
 def index():
@@ -265,7 +269,6 @@ def subject_search():
 
         return jsonify({"text": to_send})
 
-
 @app.route("/encode-text", methods=["GET"])
 def encode_text():
     global all_text_together_sentences
@@ -286,7 +289,3 @@ def get_projects_papers():
         }
     ]
     return jsonify({"saved_papers": saved_papers})
-
-
-if __name__ == "__main__":
-    app.run()
