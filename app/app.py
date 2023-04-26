@@ -102,6 +102,10 @@ def index():
     else:
         return render_template("index.html", form=form)
 
+@app.route("/what-is-quicklit")
+def explain_quicklit():
+    return render_template("what_is_quicklit.html")
+
 @app.route("/upload-your-paper", methods=["POST", "GET"])
 def upload():
     form = FileUploadForm()
