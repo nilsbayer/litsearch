@@ -13,3 +13,10 @@ h1 {
 input[type="text"] {
     width: 40vw;
 }
+
+.btns {
+    margin-top: 12rem;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}

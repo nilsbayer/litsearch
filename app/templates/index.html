@@ -58,7 +58,11 @@
         <div>
             <form id="search-form" action="" method="GET">
             {{ form.search(placeholder="Enter what you are looking for ...") }}
-        </form>
+            </form>
+        </div>
+        <div class="btns">
+            <a href="{{ url_for('explain_quicklit') }}" class="sec-btn">What is Quicklit?</a>
+            <span class="sec-btn">Filter by research field</span>
         </div>
     </main>
     

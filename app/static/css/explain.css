@@ -1,0 +1,269 @@
+html {
+    scroll-behavior: smooth;
+}
+
+main {
+    padding: 6rem 6rem;
+}
+
+.top-section {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+}
+
+h1 {
+    font-size: 2.75rem;
+}
+
+p {
+    font-size: 1.15rem;
+}
+
+.top-section div p {
+    padding: 2rem 2rem 0rem 0;
+    width: 75%;
+    font-size: 1.15rem;
+    line-height: 2rem;
+}
+
+b {
+    font-weight:bolder; 
+}
+
+.btns {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.prim-btn, .sec-btn {
+    font-size: 1rem;
+}
+
+#closed-eye {
+    opacity: 0;
+    animation: close-eye 4s infinite;
+}
+
+@keyframes close-eye {
+    89% {
+        opacity: 0;
+    }
+    90% {
+        opacity: 1;
+    }
+    99% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+#left-eye {
+    opacity: 1;
+    animation: close-eye-reverse 4s infinite;
+}
+
+@keyframes close-eye-reverse {
+    89% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0;
+    }
+    99% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+#LAPTOP {
+    animation: move-laptop 4s infinite;
+    transform-origin: center;
+}
+
+@keyframes move-laptop {
+    10% {
+        transform: rotate(1deg);
+    }
+    20% {
+        transform: rotate(-1deg);
+    }
+    30% {
+        transform: rotate(1deg);
+    }
+    40% {
+        transform: rotate(-1deg);
+    }
+    50% {
+        transform: rotate(1deg);
+    }
+    60% {
+        transform: rotate(-1deg);
+    }
+    70% {
+        transform: rotate(1deg);
+    }
+    85% {
+        transform: rotate(0);
+    }
+}
+
+.search-types {
+    margin: 5rem 0 2rem 0;
+}
+
+h3 {
+    font-size: 2rem;
+}
+
+.search-box-container {
+    display: flex;
+    gap: 2rem;
+    margin: 4rem 0;
+}
+
+.search-box-explain {
+    display: block;
+    padding: 2rem;
+    background-color: rgba(224, 224, 224, 0.3);
+    width: 50%;
+    height: 60vh;
+    border-radius: 10px;
+    position: relative;
+}
+
+.search-box-explain p {
+    padding: 2rem;
+    line-height: 2rem;
+}
+
+.search-box-explain p i {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.search-box-explain a {
+    position: absolute;
+    left: 50%;
+    bottom: 10%;
+    transform: translateX(-50%);
+}
+
+h4 {
+    padding-bottom: 1.5rem;
+    text-align: center;
+    color: #5B9CCB;
+    font-size: 1.15rem;
+}
+
+.beyond-search-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin: 5rem 0;
+}
+
+.beyond-search-option {
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.top-of-card {
+    height: 8rem;
+    display: flex;
+    align-items: center;
+}
+
+.beyond-search-option span {
+    width: 80%;
+    text-align: center;
+    line-height: 2rem;
+}
+
+.testimonials {
+    margin: 5rem 0;
+}
+
+.logos {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.packages {
+    margin: 5rem 0;
+}
+
+.package-boxes {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 4rem;
+    margin: 5rem 0;
+}
+
+.package {
+    border-radius: 10px;
+}
+
+.package p, .package ul li {
+    line-height: 1.5rem;
+}
+
+.package-minor {
+    background-color: #F3F3F3;
+}
+
+.package-major {
+    background-color: #3D6C8D;
+    transform: scale(1.15);
+}
+
+.package-major p, .package-major span, .package-major ul li {
+    color: white;
+}
+
+.package p {
+    padding: 1rem 2rem;
+}
+
+.package ul {
+    padding: 1rem 4rem;
+}
+
+.package ul li {
+    list-style-position: outside;
+    list-style-image: url('../imgs/Vector\ 3.png');
+}
+
+.package-title {
+    font-size: 1.5rem;
+    display: block;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.price {
+    display: block;
+    text-align: center;
+    padding: 2rem 0;
+    font-size: 1.3rem;
+}
+
+.signup-btn {
+    background-color: #5B9CCB;
+    margin: 0 0 2rem 0;
+}
+
+.negative-bullet {
+    list-style-type: url('../imgs/Vector\ 37.png');
+}
