@@ -8,6 +8,11 @@ import numpy as np
 import re
 import math
 import time
+import chromadb
+from chromadb.config import Settings
+import chromadb
+from time import perf_counter
+import json
 
 if not os.path.exists(os.path.join("pdfs")):
     os.mkdir("pdfs")
@@ -18,6 +23,21 @@ load_dotenv(find_dotenv())
 app.config["SECRET_KEY"] = os.getenv("APP_PWD")
 
 from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm
+
+# Create a new Chroma client with persistence enabled. 
+persist_directory = "chroma_with_Hamids_help"
+
+client = chromadb.Client(
+    Settings(
+        persist_directory=persist_directory,
+        chroma_db_impl="duckdb+parquet",
+    )
+)
+
+# Create a new chroma collection
+collection_name = "sentence_emb_1"
+# Load the collection
+collection = client.get_collection(collection_name)
 
 sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -61,44 +81,58 @@ emb_sentences = []
 def serve_static(path):
     return send_from_directory('static', path)
 
+def get_paragraph(result_id):
+    found_idx = int(result_id.split("_")[1])
+
+    next_idxs = [found_idx+i for i in range(1,6)]
+    before_idx = [found_idx - 1, found_idx]
+    query_idx_list = before_idx + next_idxs
+
+    queryable_idxs = [f"{result_id.split('_')[0]}_{i}" for i in query_idx_list]
+
+    collection.get(ids=queryable_idxs).get("documents")
+
+    paragraph = ".".join(collection.get(ids=queryable_idxs)['documents'])
+    paragraph = paragraph.replace("  ", "")
+    return paragraph
+
 @app.route("/", methods=["GET"])
 def index():
     form = SubjectSearchForm()
     args = request.args
     if len(args.getlist("search")) > 0:
-        results = [
-            {
-                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
-                "authors": "Gomez & Bayer",
-                "year": str(2020),
-                "title": "Attention is all we need baby"
-            },
-            {
-                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
-                "authors": "Gomez & Bayer",
-                "year": str(2020),
-                "title": "Attention is all we need baby"
-            },
-            {
-                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
-                "authors": "Gomez & Bayer",
-                "year": str(2020),
-                "title": "Attention is all we need baby"
-            },
-            {
-                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
-                "authors": "Gomez & Bayer",
-                "year": str(2020),
-                "title": "Attention is all we need baby"
-            },
-            {
-                "text": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est facilis voluptas consequuntur dignissimos consequatur possimus itaque, amet in deleniti ab, ipsum enim officia labore pariatur vel, ducimus expedita minima.",
-                "authors": "Gomez & Bayer",
-                "year": str(2020),
-                "title": "Attention is all we need baby"
+        search_term = args.getlist("search")[0]
+
+        start_time = perf_counter()
+        # Query the collection
+        results = collection.query(
+            query_texts=search_term,
+            n_results=20
+        )
+
+        results_to_show = []
+        
+        for i in range(20):
+            id_for_paragraph = results.get("ids")[0][i]
+            authors = json.loads(results.get("metadatas")[0][i].get("authors"))
+            if len(authors) == 1:
+                authors = authors[0]
+            else:
+                authors = " & ".join(authors)
+            year = results.get("metadatas")[0][i].get("publication_year")
+            title = results.get("metadatas")[0][i].get("title")
+            paragraph = get_paragraph(id_for_paragraph)
+            _ = {
+                "text": paragraph,
+                "authors": authors,
+                "year": year,
+                "title": title
             }
-        ]
-        return render_template("results.html", results=results)
+            results_to_show.append(_)
+        
+        print("****************** Results ready to show in", perf_counter() - start_time, "*******************")
+
+        return render_template("results.html", results=results_to_show)
     else:
         return render_template("index.html", form=form)
 
