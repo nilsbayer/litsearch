@@ -24,7 +24,7 @@ document.getElementById("next").addEventListener("click", () => {
         document.getElementById("name").style.display = "none"
         document.getElementById("next").style.display = "none"
         document.getElementById("submit").style.display = "inline"
-        document.querySelector("h1").innerText = "Describe what you want to investigate, thus we can propose some sample questions."
+        document.querySelector("h1").innerText = "Describe what you want to investigate, thus we can propose papers & sample questions."
     }
 })
 
