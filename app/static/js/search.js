@@ -19,6 +19,15 @@ function make_a_search() {
     .then(response => {response.json()
         .then(data => {
             resultsContainer.innerHTML = ""
+            let resultItem = document.createElement("div")
+            resultItem.classList.add("result")
+            resultItem.innerHTML = `
+<a class="search-again">
+<span class="search-again">Search: ${searchBar.value}</span>
+</a>
+            `
+            resultsContainer.append(resultItem)
+
             data.forEach(element => {
                 let resultItem = document.createElement("div")
                 resultItem.classList.add("result")
@@ -59,4 +68,11 @@ window.addEventListener("click", (e) => {
         resultsContainer.style.display = "none"
     }
 
+})
+
+window.addEventListener("click", (e) => {
+    if (e.target.classList.contains("search-again")) {
+        // redirect to search with input
+        location.href = `http://localhost:5000/?search=${searchBar.value}`
+    }
 })
