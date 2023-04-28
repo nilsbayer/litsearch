@@ -8,7 +8,9 @@
     <main>
         {% for result in results %}
             <a style="text-decoration: none;" href=""><div class="paper-result">
-                <p>{{ result.text }}</p>
+                <p>
+                    {{ result.before_text }}. <b>{{ result.found_text }}.</b> {{ result.after_text }}
+                </p>
                 <div>
                     <span>{{ result.title }}, {{ result.authors }}, {{ result.year }}
                         <svg width="16" height="16" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">

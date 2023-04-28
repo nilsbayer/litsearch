@@ -85,16 +85,21 @@ def get_paragraph(result_id):
     found_idx = int(result_id.split("_")[1])
 
     next_idxs = [found_idx+i for i in range(1,6)]
-    before_idx = [found_idx - 1, found_idx]
+    before_idx = [found_idx - 1]
     query_idx_list = before_idx + next_idxs
 
     queryable_idxs = [f"{result_id.split('_')[0]}_{i}" for i in query_idx_list]
 
-    collection.get(ids=queryable_idxs).get("documents")
+    after_sentences = collection.get(ids=queryable_idxs[2:]).get("documents")
+    try:
+        before_sentence = collection.get(ids=queryable_idxs[0]).get("documents")[0]
+    except:
+        before_sentence = ""
+    found_sentence = collection.get(ids=queryable_idxs[1]).get("documents")[0]
 
-    paragraph = ".".join(collection.get(ids=queryable_idxs)['documents'])
+    paragraph = ".".join(after_sentences)
     paragraph = paragraph.replace("  ", "")
-    return paragraph
+    return before_sentence, found_sentence, paragraph
 
 @app.route("/", methods=["GET"])
 def index():
@@ -121,9 +126,11 @@ def index():
                 authors = " & ".join(authors)
             year = results.get("metadatas")[0][i].get("publication_year")
             title = results.get("metadatas")[0][i].get("title")
-            paragraph = get_paragraph(id_for_paragraph)
+            before, actual_found, paragraph = get_paragraph(id_for_paragraph)
             _ = {
-                "text": paragraph,
+                "before_text": before,
+                "found_text": actual_found,
+                "after_text": paragraph,
                 "authors": authors,
                 "year": year,
                 "title": title
