@@ -13,6 +13,8 @@ from chromadb.config import Settings
 import chromadb
 from time import perf_counter
 import json
+from pymongo import MongoClient
+from datetime import datetime
 
 if not os.path.exists(os.path.join("pdfs")):
     os.mkdir("pdfs")
@@ -38,6 +40,18 @@ client = chromadb.Client(
 collection_name = "sentence_emb_1"
 # Load the collection
 collection = client.get_collection(collection_name)
+
+# Get connection to Mongo Database
+DB_URI = os.getenv("DB_URI")
+mongo_client = MongoClient(DB_URI)
+# client = MongoClient(
+#           host='test_mongodb',
+#           port=27017,
+#           username='root',
+#           password='pass', 
+#           authSource="admin")    
+mongo_db = mongo_client.get_database("users")
+users_col = mongo_db["users"]
 
 sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -145,6 +159,36 @@ def index():
 
 @app.route("/what-is-quicklit")
 def explain_quicklit():
+    test_user_input = {
+        "full_name": "Max Mustermann",
+        "email": "mustermann@test.com",
+        "pwd": "ahsuh445",
+        "package": "Smart Student",
+        "institution": None,
+        "stripe_cus_id": "cus_1236767",
+        "stripe_subscription_id": "sub_12345346",
+        "sign_up_date": datetime.now(),
+        "days_to_paid": 23,
+        "projects": [
+            {
+                "project_name": "Bachelor Thesis",
+                "token": "ASD123",
+                "description": "lorem ipsum ...",
+                "found_papers": [
+                    {
+                        "title": "Test paper",
+                        "purpose": "Data Science",
+                        "purpose_type": "definition",
+                        "id": "GHA13"
+                    }
+                ],
+                "saved_papers": [],
+                "potential_qustions": []
+            }
+        ]
+    }
+    users_col.insert_one(test_user_input)
+
     return render_template("what_is_quicklit.html")
 
 @app.route("/upload-your-paper", methods=["POST", "GET"])

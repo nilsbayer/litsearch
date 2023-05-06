@@ -7,12 +7,18 @@ services:
     build: ./app
     ports:
       - "8000:8000"
+    depends_on:
+      - mongodb
     environment:
       - APP_PWD=passwort1!
+      # - DB_URI=mongodb://username:pwd123@localhost:27017/?authMechanism=DEFAULT
+      - DB_URI=mongodb://root:pass@test_mongodb:27017/
     #   - DB_URL=postgresql://postgres:postgres@flask_db:5432/postgres
-    # depends_on:
-    #   - flask_db
     command: gunicorn -w 3 -b 0.0.0.0:8000 wsgi:app
+    networks:
+      - my-network
+    links:
+      - mongodb
     # volumes:
     #   - flask_app_data:/app/data
   
@@ -24,3 +30,37 @@ services:
       - "80:80"
     depends_on:
       - flask_app
+    networks:
+      - my-network
+
+  # mongodb:
+  #   image: mongo:4.0.8
+  #   container_name: mongodb
+  #   restart: unless-stopped
+  #   command: mongod --auth
+  #   environment:
+  #     # MONGO_INITDB_ROOT_USERNAME: mongodbuser
+  #     # MONGO_INITDB_ROOT_PASSWORD: your_mongodb_root_password
+  #     MONGO_INITDB_DATABASE: flaskdb
+  #     MONGODB_DATA_DIR: /data/db
+  #     MONDODB_LOG_DIR: /dev/null
+  mongodb:
+    image: mongo:4.2
+    hostname: test_mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=users
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    volumes:
+      - mongodbdata:/data/db
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  mongodbdata:
