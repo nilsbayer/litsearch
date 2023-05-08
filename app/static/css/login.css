@@ -1,0 +1,98 @@
+main {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;   
+}
+
+.buffer {
+    margin-bottom: 20vh;
+}
+
+h1 {
+    margin-bottom: 2rem;
+}
+
+input {
+    margin: .5rem 0;
+}
+
+.btns {
+    margin-top: 1rem;
+    /* display: flex;
+    gap: 1rem; */
+}
+
+.sec-btn {
+    margin-right: 1rem;
+}
+
+#closed-eye {
+    opacity: 0;
+    animation: close-eye 4s infinite;
+}
+
+@keyframes close-eye {
+    89% {
+        opacity: 0;
+    }
+    90% {
+        opacity: 1;
+    }
+    99% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+#left-eye {
+    opacity: 1;
+    animation: close-eye-reverse 4s infinite;
+}
+
+@keyframes close-eye-reverse {
+    89% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0;
+    }
+    99% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+#LAPTOP {
+    animation: move-laptop 4s infinite;
+    transform-origin: center;
+}
+
+@keyframes move-laptop {
+    10% {
+        transform: rotate(1deg);
+    }
+    20% {
+        transform: rotate(-1deg);
+    }
+    30% {
+        transform: rotate(1deg);
+    }
+    40% {
+        transform: rotate(-1deg);
+    }
+    50% {
+        transform: rotate(1deg);
+    }
+    60% {
+        transform: rotate(-1deg);
+    }
+    70% {
+        transform: rotate(1deg);
+    }
+    85% {
+        transform: rotate(0);
+    }
+}

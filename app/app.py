@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, render_template, url_for, redirect, request, abort, send_from_directory
+from flask import Flask, jsonify, render_template, flash, url_for, redirect, request, abort, send_from_directory, session
+from flask_bcrypt import Bcrypt
 import os
 import PyPDF2
 import requests
@@ -24,7 +25,9 @@ app = Flask(__name__, static_url_path="/")
 load_dotenv(find_dotenv())
 app.config["SECRET_KEY"] = os.getenv("APP_PWD")
 
-from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm
+bcrypt = Bcrypt(app)
+
+from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm, LoginForm
 
 # Create a new Chroma client with persistence enabled. 
 persist_directory = "chroma_with_Hamids_help"
@@ -157,12 +160,53 @@ def index():
     else:
         return render_template("index.html", form=form)
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+
+    if "email" in session:
+        # User is already logged in 
+        return redirect(url_for("index"))
+
+
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+
+        user_found = users_col.find_one({"email": email})
+        if user_found:
+            email_val = user_found['email']
+            passwordcheck = user_found['password']
+            
+            if bcrypt.check_password_hash(passwordcheck, password):
+                session["email"] = email_val
+                return redirect(url_for("index"))
+            else:
+                if "email" in session:
+                    return redirect(url_for("index"))
+                # Wrong password
+                flash("Login failed. Please check your email and password")
+                return redirect(url_for("login"))
+        else:
+            message = 'Email not found'
+            flash("Email was not found")
+            return redirect(url_for("login"))
+
+    return render_template("login.html", search_available=False, form=form)
+
+@app.route("/logout")
+def logout():
+    if "email" in session:
+        session.pop("email", None)
+    flash("You logged out successfully.")
+    return redirect(url_for("login"))
+
 @app.route("/what-is-quicklit")
 def explain_quicklit():
     test_user_input = {
         "full_name": "Max Mustermann",
         "email": "mustermann@test.com",
-        "pwd": "ahsuh445",
+        "password": bcrypt.generate_password_hash("passwort1!").decode('utf-8'),
         "package": "Smart Student",
         "institution": None,
         "stripe_cus_id": "cus_1236767",
@@ -244,7 +288,7 @@ def upload():
             summary = summarize_text({"inputs": "summarize: "+all_text_together})[0]["summary_text"]
 
         return render_template("custom_paper.html", total_text = all_text_together, tags=tags, summary=summary)
-    return render_template("upload.html", form=form)
+    return render_template("upload.html", form=form, search_available=True)
 
 @app.route("/create-survey", methods=["POST", "GET"])
 def create_survey():
@@ -253,7 +297,7 @@ def create_survey():
         print("******* YEEES")
         return redirect("index")
     else:
-        return render_template("create_survey.html", form=form)
+        return render_template("create_survey.html", form=form, search_available=True)
 
 @app.route("/project/<string:project_token>")
 def get_project(project_token):
@@ -285,7 +329,7 @@ def get_project(project_token):
             }
         ]
     }
-    return render_template("project.html", project=project)
+    return render_template("project.html", project=project, search_available=True)
 
 @app.route("/paper/<string:paper_token>")
 def get_paper(paper_token):
@@ -306,7 +350,7 @@ def get_paper(paper_token):
         "link_pdf": "https://arxiv.org/pdf/1706.03762.pdf",
         "pdf_provider": "arxiv.org"
     }
-    return render_template("paper.html", paper=paper)
+    return render_template("paper.html", paper=paper, search_available=True)
 
 topics = ["Artificial Intelligence", "Sustainability", "Medicine", "Marketing", "Finance", "Accounting", "Mechanical Engineering"]
 papers = ["Attention is all you need", "Machine learning in medicine", "The power of linear regression"]

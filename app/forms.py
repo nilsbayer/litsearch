@@ -2,8 +2,13 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from flask_wtf.file import FileAllowed, FileRequired, FileField
-from wtforms.fields import MultipleFileField, TextAreaField
+from wtforms.fields import MultipleFileField, TextAreaField, PasswordField
 from wtforms.validators import DataRequired, Length, ValidationError, EqualTo, Email
+
+class LoginForm(FlaskForm):
+    email = StringField('Your lovely email', validators=[DataRequired(), Email()])
+    password = PasswordField("Your safely chosen password", validators=[DataRequired(), Length(min=6)])
+    submit = SubmitField('Login')
 
 class FileUploadForm(FlaskForm):
     files = MultipleFileField('PDF', validators=[FileAllowed(["pdf"], 'PDFs only!')])
