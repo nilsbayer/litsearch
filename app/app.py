@@ -27,8 +27,6 @@ app.config["SECRET_KEY"] = os.getenv("APP_PWD")
 
 bcrypt = Bcrypt(app)
 
-from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm, LoginForm
-
 # Create a new Chroma client with persistence enabled. 
 persist_directory = "chroma_with_Hamids_help"
 
@@ -56,20 +54,20 @@ mongo_client = MongoClient(DB_URI)
 mongo_db = mongo_client.get_database("users")
 users_col = mongo_db["users"]
 
-sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
+# sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-headers = {"Authorization": f"Bearer {os.getenv('HF_AUTH')}"}
+# headers = {"Authorization": f"Bearer {os.getenv('HF_AUTH')}"}
 
-def create_tags(payload):
-    API_URL_TAGS = "https://api-inference.huggingface.co/models/fabiochiu/t5-base-tag-generation"
+# def create_tags(payload):
+#     API_URL_TAGS = "https://api-inference.huggingface.co/models/fabiochiu/t5-base-tag-generation"
     
-    response = requests.post(API_URL_TAGS, headers=headers, json=payload)
-    return response.json()
+#     response = requests.post(API_URL_TAGS, headers=headers, json=payload)
+#     return response.json()
 
-def summarize_text(payload):
-    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-    response = requests.post(API_URL, headers=headers, json=payload)
-    return response.json()
+# def summarize_text(payload):
+#     API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+#     response = requests.post(API_URL, headers=headers, json=payload)
+#     return response.json()
 
 
 def get_pdf_text(pdf_path):
@@ -93,6 +91,8 @@ def get_pdf_text(pdf_path):
 
 all_text_together = ""
 emb_sentences = []
+
+from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm, LoginForm, SignUpForm
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -160,6 +160,38 @@ def index():
     else:
         return render_template("index.html", form=form)
 
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    form = SignUpForm()
+
+    if "email" in session:
+        # User is already logged in 
+        return redirect(url_for("index"))
+
+    if form.validate_on_submit():
+        user = users_col.find_one({"email": form.email.data})
+        if user:
+            flash("Email is already in use.")
+            return redirect(url_for("signup"))
+        
+        hashed_pwd = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user_data = {
+            "full_name": "Max Mustermann",
+            "email": form.email.data,
+            "password": hashed_pwd,
+            "package": "Smart Student",
+            "institution": None,
+            "stripe_cus_id": "cus_1236767",
+            "stripe_subscription_id": "sub_12345346",
+            "sign_up_date": datetime.now(),
+            "days_to_paid": 0,
+            "projects": []
+        }
+        users_col.insert_one(user_data)
+        return redirect(url_for("login"))
+
+    return render_template("signup.html", search_available=False, form=form)
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
@@ -203,36 +235,6 @@ def logout():
 
 @app.route("/what-is-quicklit")
 def explain_quicklit():
-    test_user_input = {
-        "full_name": "Max Mustermann",
-        "email": "mustermann@test.com",
-        "password": bcrypt.generate_password_hash("passwort1!").decode('utf-8'),
-        "package": "Smart Student",
-        "institution": None,
-        "stripe_cus_id": "cus_1236767",
-        "stripe_subscription_id": "sub_12345346",
-        "sign_up_date": datetime.now(),
-        "days_to_paid": 23,
-        "projects": [
-            {
-                "project_name": "Bachelor Thesis",
-                "token": "ASD123",
-                "description": "lorem ipsum ...",
-                "found_papers": [
-                    {
-                        "title": "Test paper",
-                        "purpose": "Data Science",
-                        "purpose_type": "definition",
-                        "id": "GHA13"
-                    }
-                ],
-                "saved_papers": [],
-                "potential_qustions": []
-            }
-        ]
-    }
-    users_col.insert_one(test_user_input)
-
     return render_template("what_is_quicklit.html")
 
 @app.route("/upload-your-paper", methods=["POST", "GET"])

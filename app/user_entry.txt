@@ -1,0 +1,28 @@
+user_data = {
+    "full_name": "Max Mustermann",
+    "email": form.email.data,
+    "password": bcrypt.generate_password_hash("passwort1!").decode('utf-8'),
+    "package": "Smart Student",
+    "institution": None,
+    "stripe_cus_id": "cus_1236767",
+    "stripe_subscription_id": "sub_12345346",
+    "sign_up_date": datetime.now(),
+    "days_to_paid": None,
+    "projects": [
+        {
+            "project_name": "Bachelor Thesis",
+            "token": "ASD123",
+            "description": "lorem ipsum ...",
+            "found_papers": [
+                {
+                    "title": "Test paper",
+                    "purpose": "Data Science",
+                    "purpose_type": "definition",
+                    "id": "GHA13"
+                }
+            ],
+            "saved_papers": [],
+            "potential_qustions": []
+        }
+    ]
+}

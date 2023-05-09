@@ -6,16 +6,7 @@ window.addEventListener("load", () => {
 // Clicking on "next" button
 document.getElementById("next").addEventListener("click", () => {
     if (document.getElementById("name").value === "") {
-        let errorDiv = document.createElement("div")
-        errorDiv.innerHTML = "Please name the project"
-        errorDiv.classList.add("error-div")
-        document.body.append(errorDiv)
-        setTimeout(() => {
-            errorDiv.style.top = "110vh"
-            setTimeout(() => {
-                errorDiv.remove()
-            }, 500)
-        }, 4500)
+        notify_user("Please name the project", "error")
     }
     else {
         document.getElementById("description").focus()

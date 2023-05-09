@@ -13,7 +13,7 @@
             {{ form.email(placeholder="Your lovely email") }}
             {{ form.password(placeholder="Your safely chosen password") }}
             <div class="btns">
-                <span class="sec-btn">Create an account</span>
+                <a class="sec-btn" href="{{ url_for('signup') }}">Create an account</a>
                 {{ form.submit(class="prim-btn") }}
             </div>
         </form>
@@ -134,13 +134,4 @@
     </div>
 </main>
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
 {% endblock dynamic_content %}

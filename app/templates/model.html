@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/model.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/classes.css') }}">
     <script src="{{ url_for('static', filename='js/search.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/classes.js') }}"></script>
     {% block extended_head %}
     {% endblock extended_head %}
     <title>Litsearch</title>
@@ -69,5 +70,18 @@
         {% block dynamic_content %}
         {% endblock dynamic_content %}
     </div>
+
+
+
+    <script>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+        let message_to_show = "{{message}}"
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+    notify_user(message_to_show, "success")
+    </script>
 </body>
 </html>
