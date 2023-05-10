@@ -13,7 +13,7 @@
             {{ form.email(placeholder="Your lovely email") }}
             {{ form.password(placeholder="Your safely chosen password") }}
             <div class="btns">
-                <a class="sec-btn" href="{{ url_for('signup') }}">Create an account</a>
+                <a class="sec-btn" href="{{ url_for('signup', package='freshman') }}">Create an account</a>
                 {{ form.submit(class="prim-btn") }}
             </div>
         </form>

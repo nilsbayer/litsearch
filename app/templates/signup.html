@@ -8,13 +8,15 @@
 <main>
     <div>
         <h1>Join Quicklit & save valuable time</h1>
-        <form action="{{ url_for('signup') }}" method="POST">
+        <form action="{{ url_for('signup', package='{{ package }}') }}" method="POST">
             {{ form.csrf_token }}
+            {{ form.package(value=package) }}
+            {{ form.full_name(placeholder="Your full name") }}
             {{ form.email(placeholder="Your lovely email") }}
             {{ form.password(placeholder="Your safely chosen password") }}
             {{ form.confirm_password(placeholder="Confirm your chosen password") }}
             <div class="btns">
-                <a class="sec-btn" href="{{ url_for('login') }}">CHange to login</a>
+                <a class="sec-btn" href="{{ url_for('login') }}">Change to login</a>
                 {{ form.submit(class="prim-btn") }}
             </div>
         </form>

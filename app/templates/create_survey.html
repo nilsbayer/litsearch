@@ -11,6 +11,7 @@
     <h1>Create a study project</h1>
     <div>
         <form id="survey-form" action="" method="POST">
+            {{ form.csrf_token }}
             {{ form.name(placeholder="Enter a project name ...") }}
             {{ form.description(placeholder="e.g. I want to investigate the impact of income on education ...") }}
             <div class="btns">

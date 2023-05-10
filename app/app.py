@@ -9,6 +9,7 @@ import numpy as np
 import re
 import math
 import time
+import secrets
 import chromadb
 from chromadb.config import Settings
 import chromadb
@@ -121,6 +122,16 @@ def get_paragraph(result_id):
 @app.route("/", methods=["GET"])
 def index():
     form = SubjectSearchForm()
+
+    if "email" in session:
+        user_projects = users_col.distinct("projects", {"email": session["email"]})
+        if len(user_projects) > 3:
+            recent_projects = user_projects[:3]
+        else:
+            recent_projects = user_projects
+    else:
+        recent_projects = None
+
     args = request.args
     if len(args.getlist("search")) > 0:
         search_term = args.getlist("search")[0]
@@ -158,11 +169,19 @@ def index():
 
         return render_template("results.html", results=results_to_show)
     else:
-        return render_template("index.html", form=form)
+        return render_template("index.html", form=form, recent_projects=recent_projects)
 
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
+@app.route("/signup/<string:package>", methods=["GET", "POST"])
+def signup(package):
     form = SignUpForm()
+
+    package_list = ["smart-student", "freshman", "graduater"]
+
+    if request.method == "GET":
+        if package in package_list:
+            package = package
+        else:
+            return redirect(url_for("explain_quicklit"))
 
     if "email" in session:
         # User is already logged in 
@@ -172,25 +191,36 @@ def signup():
         user = users_col.find_one({"email": form.email.data})
         if user:
             flash("Email is already in use.")
-            return redirect(url_for("signup"))
+            return redirect(url_for("signup", package=package))
+
+        if form.package.data not in package_list:
+            return redirect(url_for("explain_quicklit"))
         
+        if form.package.data != "freshman":
+            days_to_paid = 0
+        else:
+            days_to_paid = None
+
         hashed_pwd = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user_data = {
-            "full_name": "Max Mustermann",
+            "full_name": form.full_name.data,
             "email": form.email.data,
             "password": hashed_pwd,
-            "package": "Smart Student",
+            "package": form.package.data,
             "institution": None,
             "stripe_cus_id": "cus_1236767",
             "stripe_subscription_id": "sub_12345346",
             "sign_up_date": datetime.now(),
-            "days_to_paid": 0,
+            "days_to_paid": days_to_paid,
             "projects": []
         }
         users_col.insert_one(user_data)
+
+        flash("You successfully created an account!<br> Please login now.")
         return redirect(url_for("login"))
 
-    return render_template("signup.html", search_available=False, form=form)
+    if request.method == "GET":
+        return render_template("signup.html", search_available=False, form=form, package=package)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -212,6 +242,7 @@ def login():
             
             if bcrypt.check_password_hash(passwordcheck, password):
                 session["email"] = email_val
+                flash("Welcome! You logged in successfully.")
                 return redirect(url_for("index"))
             else:
                 if "email" in session:
@@ -292,46 +323,93 @@ def upload():
         return render_template("custom_paper.html", total_text = all_text_together, tags=tags, summary=summary)
     return render_template("upload.html", form=form, search_available=True)
 
-@app.route("/create-survey", methods=["POST", "GET"])
+@app.route("/my-projects", methods=["POST", "GET"])
 def create_survey():
     form = SurveyCreationForm()
-    if form.validate_on_submit():
-        print("******* YEEES")
-        return redirect("index")
+
+    if "email" not in session:
+        return render_template("projects_info.html", form=form, search_available=True) # user should see what a project can do / give already description and then being show that they need to sign up --> loss aversion
+    
     else:
-        return render_template("create_survey.html", form=form, search_available=True)
+        if form.validate_on_submit():
+            description = form.description.data
+            project_name = form.name.data
+            existing_projects = users_col.find_one({"email": session["email"]}).get("projects")
+            if len(existing_projects) > 0:
+                for project in existing_projects:
+                    if project_name == project.get("project_name"):
+                        flash("Project name taken. You already have a project called like this.")
+                        return redirect(url_for("create_survey"))
+            
+            project_token = secrets.token_hex(10)
+            project_data = {
+                "project_name": project_name,
+                "token": project_token,
+                "description": description,
+                "found_papers": [],
+                "saved_papers": [],
+                "potential_qustions": [],
+                "creation_date": datetime.now()
+            }
+            users_col.update_one(
+                {"email": session["email"]},
+                { "$push": { "projects": project_data } }
+            )
+
+            return redirect(url_for("get_project", project_token=project_token))
+
+        else:
+            # current_user = users_col.find_one({"email": session["email"]})
+            # users_projects = current_user.get("projects")
+            users_projects = users_col.distinct("projects", {"email": session["email"]})
+
+            if len(users_projects) > 0:
+                return render_template("project_overview.html", form=form, search_available=True, users_projects=users_projects)
+
+            return render_template("create_survey.html", form=form, search_available=True)
+
 
 @app.route("/project/<string:project_token>")
 def get_project(project_token):
-    project = {
-        "title": "Bachelor Thesis ESB",
-        "found_papers": [
-            {
-                "title": "Attention is all you need",
-                "explanatory_paragraph": "lorem ipsum...",
-                "link": "http://localhost:5000/paper/asd"
-            },
-            {
-                "title": "Attention is all you need",
-                "explanatory_paragraph": "lorem ipsum...",
-                "link": "http://localhost:5000/paper/asd"
-            },
-            {
-                "title": "Attention is all you need",
-                "explanatory_paragraph": "lorem ipsum...",
-                "link": "http://localhost:5000/paper/asd"
-            }
-        ],
-        "description": "I want to investigate ...",
-        "literature": [
-            {
-                "title": "Successfull business leaders",
-                "explanatory_paragraph": "lorem ipsum...",
-                "link": "http://localhost:5000/paper/asd"
-            }
-        ]
-    }
-    return render_template("project.html", project=project, search_available=True)
+    if "email" not in session:
+        return redirect(url_for("login"))
+
+    user_data = users_col.find_one({"email": session["email"]})
+    user_projects = user_data.get("projects")
+
+    for project in user_projects:
+        if project.get("token") == project_token:
+            this_project = project
+
+    # project = {
+    #     "title": "Bachelor Thesis ESB",
+    #     "found_papers": [
+    #         {
+    #             "title": "Attention is all you need",
+    #             "explanatory_paragraph": "lorem ipsum...",
+    #             "link": "http://localhost:5000/paper/asd"
+    #         },
+    #         {
+    #             "title": "Attention is all you need",
+    #             "explanatory_paragraph": "lorem ipsum...",
+    #             "link": "http://localhost:5000/paper/asd"
+    #         },
+    #         {
+    #             "title": "Attention is all you need",
+    #             "explanatory_paragraph": "lorem ipsum...",
+    #             "link": "http://localhost:5000/paper/asd"
+    #         }
+    #     ],
+    #     "description": "I want to investigate ...",
+    #     "literature": [
+    #         {
+    #             "title": "Successfull business leaders",
+    #             "explanatory_paragraph": "lorem ipsum...",
+    #             "link": "http://localhost:5000/paper/asd"
+    #         }
+    #     ]
+    # }
+    return render_template("project.html", project=this_project, search_available=True)
 
 @app.route("/paper/<string:paper_token>")
 def get_paper(paper_token):
