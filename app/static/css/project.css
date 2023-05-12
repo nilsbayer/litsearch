@@ -45,3 +45,15 @@ main {
     grid-template-columns: 1fr 1fr;
     gap: 6rem;
 }
+
+#citation {
+    width: 30vw;
+}
+
+#change_desc {
+    cursor: pointer;
+}
+
+#description-container {
+    display: none;
+}

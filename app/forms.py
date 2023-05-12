@@ -26,7 +26,10 @@ class FileUploadForm(FlaskForm):
 class SubjectSearchForm(FlaskForm):
     search = StringField('Search subject', validators=[DataRequired()])
 
+class DescriptionForm(FlaskForm):
+    description = TextAreaField('Description', validators=[DataRequired()])
+
 class SurveyCreationForm(FlaskForm):
     name = StringField('Project name', validators=[DataRequired()])
-    description = TextAreaField('Project description')
+    description = TextAreaField('Project description', validators=[DataRequired()])
     submit = SubmitField("Create")

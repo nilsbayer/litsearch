@@ -93,7 +93,7 @@ def get_pdf_text(pdf_path):
 all_text_together = ""
 emb_sentences = []
 
-from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm, LoginForm, SignUpForm
+from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm, LoginForm, SignUpForm, DescriptionForm
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -124,6 +124,7 @@ def index():
     form = SubjectSearchForm()
 
     if "email" in session:
+        log_status = True
         user_projects = users_col.distinct("projects", {"email": session["email"]})
         if len(user_projects) > 3:
             recent_projects = user_projects[:3]
@@ -131,6 +132,7 @@ def index():
             recent_projects = user_projects
     else:
         recent_projects = None
+        log_status = False
 
     args = request.args
     if len(args.getlist("search")) > 0:
@@ -167,9 +169,9 @@ def index():
         
         print("****************** Results ready to show in", perf_counter() - start_time, "*******************")
 
-        return render_template("results.html", results=results_to_show)
+        return render_template("results.html", results=results_to_show, logged_in=True)
     else:
-        return render_template("index.html", form=form, recent_projects=recent_projects)
+        return render_template("index.html", form=form, recent_projects=recent_projects, logged_in=log_status)
 
 @app.route("/signup/<string:package>", methods=["GET", "POST"])
 def signup(package):
@@ -220,7 +222,7 @@ def signup(package):
         return redirect(url_for("login"))
 
     if request.method == "GET":
-        return render_template("signup.html", search_available=False, form=form, package=package)
+        return render_template("signup.html", search_available=False, form=form, package=package, logged_in=False)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -255,7 +257,7 @@ def login():
             flash("Email was not found")
             return redirect(url_for("login"))
 
-    return render_template("login.html", search_available=False, form=form)
+    return render_template("login.html", search_available=False, form=form, logged_in=False)
 
 @app.route("/logout")
 def logout():
@@ -264,13 +266,46 @@ def logout():
     flash("You logged out successfully.")
     return redirect(url_for("login"))
 
+@app.route("/your-account")
+def your_account():
+    if "email" in session:
+        # Pulling user's data
+        users_data = users_col.find_one({"email": session["email"]})
+        packages = {
+            "freshman": "Freshman",
+            "smart-student": "Smart Student",
+            "graduater": "Graduater"
+        }
+        current_package = packages.get(users_data.get("package"))
+
+        data_to_send = {
+            "email": users_data.get("email"),
+            "name": users_data.get("full_name"),
+            "package": current_package,
+            "user_since": users_data.get("sign_up_date").strftime("%d.%m.%Y"),
+        }
+
+        return render_template("account.html", user=data_to_send)
+    else:
+        return redirect(url_for("index"))
+
 @app.route("/what-is-quicklit")
 def explain_quicklit():
-    return render_template("what_is_quicklit.html")
+    if "email" in session:
+        logged_in = True
+    else:
+        logged_in = False
+    return render_template("what_is_quicklit.html", logged_in=logged_in)
 
 @app.route("/upload-your-paper", methods=["POST", "GET"])
 def upload():
     form = FileUploadForm()
+
+    if "email" in session:
+        logged_in = True
+    else:
+        logged_in = False
+
     if form.validate_on_submit():
         # Saving the uploaded PDFs
         recently_uploaded = []
@@ -320,15 +355,15 @@ def upload():
             tags = tags.split(",")
             summary = summarize_text({"inputs": "summarize: "+all_text_together})[0]["summary_text"]
 
-        return render_template("custom_paper.html", total_text = all_text_together, tags=tags, summary=summary)
-    return render_template("upload.html", form=form, search_available=True)
+        return render_template("custom_paper.html", total_text = all_text_together, tags=tags, summary=summary, logged_in=logged_in)
+    return render_template("upload.html", form=form, search_available=True, logged_in=logged_in)
 
 @app.route("/my-projects", methods=["POST", "GET"])
 def create_survey():
     form = SurveyCreationForm()
 
     if "email" not in session:
-        return render_template("projects_info.html", form=form, search_available=True) # user should see what a project can do / give already description and then being show that they need to sign up --> loss aversion
+        return render_template("projects_info.html", form=form, search_available=True, logged_in=False) # user should see what a project can do / give already description and then being show that they need to sign up --> loss aversion
     
     else:
         if form.validate_on_submit():
@@ -364,15 +399,17 @@ def create_survey():
             users_projects = users_col.distinct("projects", {"email": session["email"]})
 
             if len(users_projects) > 0:
-                return render_template("project_overview.html", form=form, search_available=True, users_projects=users_projects)
+                return render_template("project_overview.html", form=form, search_available=True, users_projects=users_projects, logged_in=True)
 
-            return render_template("create_survey.html", form=form, search_available=True)
+            return render_template("create_survey.html", form=form, search_available=True, logged_in=True)
 
 
 @app.route("/project/<string:project_token>")
 def get_project(project_token):
     if "email" not in session:
         return redirect(url_for("login"))
+
+    form = DescriptionForm()
 
     user_data = users_col.find_one({"email": session["email"]})
     user_projects = user_data.get("projects")
@@ -409,13 +446,19 @@ def get_project(project_token):
     #         }
     #     ]
     # }
-    return render_template("project.html", project=this_project, search_available=True)
+    return render_template("project.html", form=form, project=this_project, search_available=True, logged_in=True)
 
 @app.route("/paper/<string:paper_token>")
 def get_paper(paper_token):
     if not paper_token:
         print("no token set")
         abort(404)
+
+    if "email" in session:
+        logged_in=True
+    else:
+        logged_in=False
+
     paper = {
         "title": "Attention is all you need",
         "summary": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo? Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo",
@@ -430,7 +473,7 @@ def get_paper(paper_token):
         "link_pdf": "https://arxiv.org/pdf/1706.03762.pdf",
         "pdf_provider": "arxiv.org"
     }
-    return render_template("paper.html", paper=paper, search_available=True)
+    return render_template("paper.html", paper=paper, search_available=True, logged_in=logged_in)
 
 topics = ["Artificial Intelligence", "Sustainability", "Medicine", "Marketing", "Finance", "Accounting", "Mechanical Engineering"]
 papers = ["Attention is all you need", "Machine learning in medicine", "The power of linear regression"]
@@ -502,3 +545,36 @@ def get_projects_papers():
         }
     ]
     return jsonify({"saved_papers": saved_papers})
+
+@app.route("/update-project-desc", methods=["POST"])
+def update_project_desc():
+    if request.method == "POST":
+        if "email" in session:
+            new_desc = request.get_json().get("description_text")
+            project_token = request.get_json().get("project_token")
+            try:
+                users_col.update_one(
+                    {
+                        "email": session["email"],
+                        "projects": {"$elemMatch": {"token": project_token}}
+                    },
+                    {"$set": {"projects.$.description": new_desc}}
+                )
+                return jsonify(
+                    {
+                        "message": "OK",
+                        "new_desc": new_desc,
+                        "notification": "Description updated successfully."
+                    }
+                )
+            except:
+                print("Failed update")
+                return jsonify(
+                    {
+                        "message": "error",
+                    }
+                )
+        
+        return jsonify({"error": "Not logged in"})
+
+    return jsonify({"error": "Wrong method"})

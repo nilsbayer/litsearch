@@ -38,6 +38,7 @@ textarea {
     border-radius: 5px;
     color: #6D6D6D;
     resize: none;
+    font-size: 1rem;
 }
 
 .prim-btn {
