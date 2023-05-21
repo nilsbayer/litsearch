@@ -1,0 +1,47 @@
+{% extends "model.html" %}
+
+{% block extended_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}">
+<script src="{{ url_for('static', filename='js/editor.js') }}" defer></script>
+{% endblock extended_head %}
+
+{% block dynamic_content %}
+{% if paper %}
+<h1>{{ paper.title }}</h1>
+{% endif %}
+<main>
+    {% if paper %}
+    <div>
+        {{ form.csrf_token }}
+        {{ form.paper_text(class="editor", value=paper.text) }}
+        {{ form.paper_token }}
+    </div>
+    {% else %}
+    <div>
+        {{ form.csrf_token }}
+        {{ form.paper_text(class="editor", placeholder="Start writing your paper here ...") }}
+        {{ form.paper_token }}
+    </div>
+    {% endif %}
+    <div class="papers-actions">
+        <div class="paper-results">
+            <span>Results will be shown here once you start writing ...</span>
+        </div>
+        {% if paper %}
+        <div class="btns">
+            <span class="sec-btn" id="save-btn">Save</span>
+            <span class="prim-btn">Save & Format</span>
+        </div>
+        <p id="auto-save">
+            Auto-saved successfully
+        </p>
+        {% endif %}
+    </div>
+</main>
+{% if paper %}
+<script>
+    var current_text = "{{ paper.text }}"    
+    document.getElementById("paper_text").innerText = current_text
+</script>
+{% endif %}
+{% endblock dynamic_content %}

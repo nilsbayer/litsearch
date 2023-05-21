@@ -57,3 +57,7 @@ main {
 #description-container {
     display: none;
 }
+
+#save-svg {
+    display: none;
+}

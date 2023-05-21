@@ -33,3 +33,12 @@ class SurveyCreationForm(FlaskForm):
     name = StringField('Project name', validators=[DataRequired()])
     description = TextAreaField('Project description', validators=[DataRequired()])
     submit = SubmitField("Create")
+
+class EditorForm(FlaskForm):
+    paper_text = TextAreaField("Your paper's text", validators=[])
+    paper_token = HiddenField('Project token', validators=[DataRequired()])
+
+class newPaperForm(FlaskForm):
+    paper_title = StringField('Paper name', validators=[DataRequired()])
+    project_token = HiddenField('Project token', validators=[DataRequired()])
+    submit = SubmitField("Create")

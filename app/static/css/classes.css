@@ -126,3 +126,32 @@ textarea {
         top: 85vh;
     }
 }
+
+[data-tooltip] {
+    --scale: 0;
+    position: relative;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    top: 150%;
+    left: 50%;
+    position: absolute;
+    width: max-content;
+    padding: .5rem;
+    background-color: rgb(76, 76, 76);
+    border-radius: 5px;
+    transform: translateX(-50%);
+    color: white;
+    font-size: .8rem;
+    transition: opacity .1s .5s;
+    opacity: var(--scale);
+}
+
+[data-tooltip]:hover::after {
+    --scale: 1;
+}
+
+svg[data-tooltip] {
+    display: inline-block;
+}

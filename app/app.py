@@ -93,7 +93,7 @@ def get_pdf_text(pdf_path):
 all_text_together = ""
 emb_sentences = []
 
-from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm, LoginForm, SignUpForm, DescriptionForm
+from forms import FileUploadForm, SubjectSearchForm, SurveyCreationForm, LoginForm, SignUpForm, DescriptionForm, EditorForm, newPaperForm
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -214,7 +214,8 @@ def signup(package):
             "stripe_subscription_id": "sub_12345346",
             "sign_up_date": datetime.now(),
             "days_to_paid": days_to_paid,
-            "projects": []
+            "projects": [],
+            "papers": []
         }
         users_col.insert_one(user_data)
 
@@ -383,7 +384,7 @@ def create_survey():
                 "description": description,
                 "found_papers": [],
                 "saved_papers": [],
-                "potential_qustions": [],
+                "potential_questions": [],
                 "creation_date": datetime.now()
             }
             users_col.update_one(
@@ -418,6 +419,12 @@ def get_project(project_token):
         if project.get("token") == project_token:
             this_project = project
 
+    for paper in user_data.get("papers"):
+        if paper.get("connected_project") == project_token:
+            connected_paper = paper
+        else:
+            connected_paper = None
+    
     # project = {
     #     "title": "Bachelor Thesis ESB",
     #     "found_papers": [
@@ -446,7 +453,7 @@ def get_project(project_token):
     #         }
     #     ]
     # }
-    return render_template("project.html", form=form, project=this_project, search_available=True, logged_in=True)
+    return render_template("project.html", editor_paper=connected_paper, form=form, project=this_project, search_available=True, logged_in=True)
 
 @app.route("/paper/<string:paper_token>")
 def get_paper(paper_token):
@@ -474,6 +481,109 @@ def get_paper(paper_token):
         "pdf_provider": "arxiv.org"
     }
     return render_template("paper.html", paper=paper, search_available=True, logged_in=logged_in)
+
+@app.route("/editor/<string:paper_token>")
+def editor(paper_token):
+    form = EditorForm()
+    if "email" in session:
+        logged_in = True
+        if paper_token == "overview":
+            form = newPaperForm()
+            # Query for projects
+            user_data = users_col.find_one(
+                {"email": session["email"]},
+            )
+            user_papers = user_data["papers"]
+            if len(user_papers) == 0:
+                user_papers = None
+
+            return render_template("paper_overview.html", user_papers=user_papers, form=form, search_available=True, logged_in=logged_in)
+        else:
+            user_data = users_col.find_one(
+                {"email": session["email"]},
+            )
+            user_papers = user_data.get("papers")
+            for paper in user_papers:
+                if paper.get("token") == paper_token:
+                    this_project = paper
+
+            return render_template("editor.html", paper=this_project, form=form, search_available=True, logged_in=logged_in)
+
+    else:
+        logged_in = False
+    
+    return render_template("editor.html", form=form, search_available=True, logged_in=logged_in)
+
+
+"*****************************************                  POST REQUESTS                *******************************************************"
+
+@app.route("/project/start-paper", methods=["POST"])
+def start_paper():
+    if request.method == "POST":
+        project_token = request.get_json().get("project_token")
+        project_name = request.get_json().get("project_name")
+
+        paper_title = project_name + " - Paper"
+
+        existing_papers = users_col.find_one({"email": session["email"]}).get("papers")
+        if len(existing_papers) > 0:
+            for paper in existing_papers:
+                if paper_title == paper.get("title"):
+                    paper_title = project_name + " - Paper (Copy)"
+        
+        paper_token = secrets.token_hex(10)
+        paper_data = {
+            "title": paper_title,
+            "text": "",
+            "token": paper_token,
+            "references": [],
+            "connected_project": project_token,
+            "creation_date": datetime.now()
+        }
+        users_col.update_one(
+            {"email": session["email"]},
+            { "$push": { "papers": paper_data } }
+        )
+
+        return jsonify(
+            {
+                "message": "success",
+                "url": url_for("editor", paper_token=paper_token)
+            })
+    return jsonify({"message": "error"})
+
+@app.route("/editor/new-paper", methods=["POST"])
+def new_paper():
+    form = newPaperForm()
+    if form.validate_on_submit():
+        paper_title = form.paper_title.data
+        project_token = form.project_token.data
+        if project_token == "none":
+            project_token = None
+        existing_papers = users_col.find_one({"email": session["email"]}).get("papers")
+        if len(existing_papers) > 0:
+            for paper in existing_papers:
+                if paper_title == paper.get("title"):
+                    flash("Paper name taken. You already have a paper called like this.")
+                    return redirect(url_for("create_survey"))
+        
+        paper_token = secrets.token_hex(10)
+        paper_data = {
+            "title": paper_title,
+            "text": "",
+            "token": paper_token,
+            "references": [],
+            "connected_project": project_token,
+            "creation_date": datetime.now()
+        }
+        users_col.update_one(
+            {"email": session["email"]},
+            { "$push": { "papers": paper_data } }
+        )
+
+        return redirect(url_for("editor", paper_token=paper_token))
+
+    return jsonify({"message": "error"})
 
 topics = ["Artificial Intelligence", "Sustainability", "Medicine", "Marketing", "Finance", "Accounting", "Mechanical Engineering"]
 papers = ["Attention is all you need", "Machine learning in medicine", "The power of linear regression"]
@@ -578,3 +688,69 @@ def update_project_desc():
         return jsonify({"error": "Not logged in"})
 
     return jsonify({"error": "Wrong method"})
+
+@app.route("/analyse-editor-text", methods=["POST"])
+def analyse_editor_text():
+    if request.method == "POST":
+        form = EditorForm()
+        last_sentence = request.get_json().get("last_sentence")
+        last_2_sentences = request.get_json().get("last_2_sentences")
+
+        # Query chromadb
+        results = collection.query(
+            query_texts=last_sentence,
+            n_results=10
+        )
+
+        results_to_show = []
+
+        for i in range(10):
+            id_for_paragraph = results.get("ids")[0][i]
+            authors = json.loads(results.get("metadatas")[0][i].get("authors"))
+            if len(authors) == 1:
+                authors = authors[0]
+            else:
+                authors = authors[0] + " et. al."
+            year = results.get("metadatas")[0][i].get("publication_year")
+            title = results.get("metadatas")[0][i].get("title")
+            before, actual_found, paragraph = get_paragraph(id_for_paragraph)
+            _ = {
+                "paragraph": before + ". " + actual_found + ". " + paragraph,
+                "title": title,
+                "auth_year": authors + ", " + str(year)
+            }
+            results_to_show.append(_)
+
+        return jsonify({
+            "message": "success",
+            "results": results_to_show
+        })
+    # else:
+    #     return jsonify({"message": "Error. Form was not valid."})
+    else:
+        return jsonify({"message": "Error. Wrong method."})
+
+@app.route("/editor/save", methods=["POST"])
+def save_paper():
+    if "email" not in session:
+        abort(403)
+
+    if request.method == "POST":
+        new_text = request.get_json().get("paper_text")
+        paper_token = request.get_json().get("paper_token")
+
+        try:
+            users_col.update_one(
+                {
+                    "email": session["email"],
+                    "papers": {"$elemMatch": {"token": paper_token}}
+                },
+                {"$set": {"papers.$.text": new_text}}
+            )
+
+            return jsonify({"message": "success"})
+
+        except:
+            return jsonify({"message": "error update"})
+
+    return jsonify({"message": "error"})

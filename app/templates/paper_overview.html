@@ -1,0 +1,27 @@
+{% extends "model.html" %}
+
+{% block extended_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}">
+{% endblock extended_head %}
+
+{% block dynamic_content %}
+
+{% if user_papers %}
+    <ul class="papers-container">
+        {% for paper in user_papers %}
+            <div class="recent-project-box">
+                <a style="text-decoration: none;" href="{{ url_for('editor', paper_token=paper.token ) }}"><span>{{ paper.title }}</span></a>
+            </div>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<div>
+    <form action="{{ url_for('new_paper') }}" method="POST">
+        {{ form.csrf_token }}
+        {{ form.paper_title(placeholder="Name your paper ...") }}
+        {{ form.project_token(value="none") }}
+        {{ form.submit(class="prim-btn") }}
+    </form>
+</div>
+{% endblock dynamic_content %}
