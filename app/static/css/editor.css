@@ -22,11 +22,14 @@ main {
     grid-template-columns: 2fr 1fr;
     gap: 4rem;
     position: relative;
+    justify-content: left;
 }
 
 textarea {
     background-color: red;
     height: 65vh;
+    z-index: 0;
+    padding: 1rem 1rem 1rem 0;
 }
 
 .papers-actions {

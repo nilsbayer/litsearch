@@ -34,6 +34,7 @@ menu {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    z-index: 3;
     align-items: flex-end;
     /* opacity: 0;
     transition: opacity .1s .1s; */
@@ -73,7 +74,7 @@ menu:hover .menu-container {
 
 .top-right-svg {
     height: var(--height-top);
-    width: 50vw;
+    /* width: 50vw; */
     position: absolute;
     right: 0;
     top:0;

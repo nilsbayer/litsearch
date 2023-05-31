@@ -37,11 +37,14 @@ client = chromadb.Client(
         chroma_db_impl="duckdb+parquet",
     )
 )
+print("************************ Chromadb", client.heartbeat())
 
 # Create a new chroma collection
 collection_name = "sentence_emb_1"
 # Load the collection
 collection = client.get_collection(collection_name)
+print("************************ Chromadb collection", collection)
+
 
 # Get connection to Mongo Database
 DB_URI = os.getenv("DB_URI")
@@ -377,12 +380,39 @@ def create_survey():
                         flash("Project name taken. You already have a project called like this.")
                         return redirect(url_for("create_survey"))
             
+            results = collection.query(
+                query_texts=description,
+                n_results=20
+            )
+
+            results_to_show = []
+        
+            for i in range(20):
+                id_for_paragraph = results.get("ids")[0][i]
+                authors = json.loads(results.get("metadatas")[0][i].get("authors"))
+                if len(authors) == 1:
+                    authors = authors[0]
+                else:
+                    authors = " & ".join(authors)
+                year = results.get("metadatas")[0][i].get("publication_year")
+                title = results.get("metadatas")[0][i].get("title")
+                before, actual_found, paragraph = get_paragraph(id_for_paragraph)
+                _ = {
+                    "before_text": before,
+                    "found_text": actual_found,
+                    "after_text": paragraph,
+                    "authors": authors,
+                    "year": year,
+                    "title": title
+                }
+                results_to_show.append(_)
+
             project_token = secrets.token_hex(10)
             project_data = {
                 "project_name": project_name,
                 "token": project_token,
                 "description": description,
-                "found_papers": [],
+                "found_papers": results_to_show,
                 "saved_papers": [],
                 "potential_questions": [],
                 "creation_date": datetime.now()
@@ -419,11 +449,14 @@ def get_project(project_token):
         if project.get("token") == project_token:
             this_project = project
 
-    for paper in user_data.get("papers"):
-        if paper.get("connected_project") == project_token:
-            connected_paper = paper
-        else:
-            connected_paper = None
+    if len(user_data.get("papers")) > 0:
+        for paper in user_data.get("papers"):
+            if paper.get("connected_project") == project_token:
+                connected_paper = paper
+            else:
+                connected_paper = None
+    else:
+        connected_paper = None
     
     # project = {
     #     "title": "Bachelor Thesis ESB",
@@ -663,13 +696,47 @@ def update_project_desc():
             new_desc = request.get_json().get("description_text")
             project_token = request.get_json().get("project_token")
             try:
+                # Make a new papers search and send new recommendations
+                results = collection.query(
+                    query_texts=new_desc,
+                    n_results=20
+                )
+
+                results_to_show = []
+            
+                for i in range(20):
+                    id_for_paragraph = results.get("ids")[0][i]
+                    authors = json.loads(results.get("metadatas")[0][i].get("authors"))
+                    if len(authors) == 1:
+                        authors = authors[0]
+                    else:
+                        authors = " & ".join(authors)
+                    year = results.get("metadatas")[0][i].get("publication_year")
+                    title = results.get("metadatas")[0][i].get("title")
+                    before, actual_found, paragraph = get_paragraph(id_for_paragraph)
+                    _ = {
+                        "before_text": before,
+                        "found_text": actual_found,
+                        "after_text": paragraph,
+                        "authors": authors,
+                        "year": year,
+                        "title": title
+                    }
+                    results_to_show.append(_)
+
                 users_col.update_one(
                     {
                         "email": session["email"],
                         "projects": {"$elemMatch": {"token": project_token}}
                     },
-                    {"$set": {"projects.$.description": new_desc}}
+                    {"$set": 
+                        {
+                            "projects.$.description": new_desc,
+                            "projects.$.found_papers": results_to_show
+                        }
+                    }
                 )
+
                 return jsonify(
                     {
                         "message": "OK",
@@ -754,3 +821,73 @@ def save_paper():
             return jsonify({"message": "error update"})
 
     return jsonify({"message": "error"})
+
+@app.route("/add-paper-to-project", methods=["POST"])
+def add_paper_to_project():
+    if "email" not in session:
+        abort(403)
+
+    if request.method == "POST":
+        paper_name = request.get_json().get("paper_name")
+        project_token = request.get_json().get("project_token")
+
+        results = collection.query(
+            query_texts="test",
+            where={
+                "title": paper_name
+            }
+        )
+
+        # Check whether paper name was modified in the front end
+        if len(results["documents"][0]) == 0:
+            return jsonify({
+                "message": "error, no such paper"
+            })
+
+        # Entry for MongoDB
+        saved_paper_entry = {
+            "title": paper_name,
+            "token": None,
+            "summary": None,
+            "paragraph": None
+        }
+
+        user = users_col.find_one(
+            {
+                "email": session["email"]
+            }
+        )
+        users_projects = user.get("projects")
+        if len(users_projects) > 0:
+            for project in users_projects:
+                if project.get("token") == project_token:
+                    if len(project.get("saved_papers") )> 0:
+                        for saved in project.get("saved_papers"):
+                            if saved.get("title") == paper_name:
+                                return jsonify({
+                                    "message": "error",
+                                    "reason": "Paper is already saved to this project."
+                                })
+        
+        try:
+            users_col.update_one(
+                {
+                    "email": session["email"],
+                    "projects": {"$elemMatch": {"token": project_token}}
+                },
+                {"$push": {"projects.$.saved_papers": saved_paper_entry}}
+            )
+
+            return jsonify({
+                "message": "success",
+                "saved_paper": saved_paper_entry,
+                "link": ""
+            })
+        except:
+            return jsonify({
+                "message": "error, update went wrong"
+            })
+
+    return jsonify({
+        "message": "error"
+    })

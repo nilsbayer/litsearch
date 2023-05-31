@@ -50,7 +50,7 @@ main {
     width: 30vw;
 }
 
-#change_desc {
+.change_desc {
     cursor: pointer;
 }
 
@@ -60,4 +60,12 @@ main {
 
 #save-svg {
     display: none;
+}
+
+#further-papers {
+    max-height: 0px;
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+    transition: all .2s ease-out;
 }
