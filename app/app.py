@@ -29,7 +29,7 @@ app.config["SECRET_KEY"] = os.getenv("APP_PWD")
 bcrypt = Bcrypt(app)
 
 # Create a new Chroma client with persistence enabled. 
-persist_directory = "chroma_with_Hamids_help"
+persist_directory = "sentence_chromadb"
 
 client = chromadb.Client(
     Settings(
