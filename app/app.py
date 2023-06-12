@@ -541,6 +541,12 @@ def editor(paper_token):
             for paper in user_papers:
                 if paper.get("token") == paper_token:
                     this_project = paper
+                    connected_project = paper.get("connected_project")
+
+            if connected_project != None:
+                for user_project in user_data.get("projects"):
+                    if user_project.get("token") == connected_project:
+                        paper.update({"saved_papers": user_project.get("saved_papers")})
 
             return render_template("editor.html", paper=this_project, form=form, search_available=True, logged_in=logged_in)
 

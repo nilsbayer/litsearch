@@ -19,10 +19,11 @@ function get_references() {
     let currentSetence = currentSetenceArray[currentSetenceArray.length -1]
     if (currentSetenceArray.length > 1) {
         var last2SentencesArray = currentSetenceArray[currentSetenceArray.length -2, currentSetenceArray.length -1]
+        last2SentencesArray.replace("&nbsp;", "")
     }
 
     currentSetence.replace("&nbsp;", "")
-    last2SentencesArray.replace("&nbsp;", "")
+    
 
     if (currentSetence !== " " || currentSetence !== "") {
         // Passing data for text to analyse to server and getting back references
@@ -121,6 +122,26 @@ window.addEventListener("click", (e) => {
     }
 })
 
+
+// Change the selected paper category: saved from project or real-time search
+const paperCats = document.querySelectorAll(".paper-cat")
+paperCats.forEach(paperCat => {
+    paperCat.addEventListener("click", (e) => {
+        paperCats.forEach(cat => {
+            cat.classList.toggle("selected-paper-cat")
+        })
+        if (document.querySelector(".selected-paper-cat") === document.getElementById("saved-lister")) {
+            document.getElementById("saved-papers-container").style.display = "block"
+            document.getElementById("real-time-container").style.display = "none"
+        }
+        else if (document.querySelector(".selected-paper-cat") === document.getElementById("real-time-searcher")) {
+            document.getElementById("saved-papers-container").style.display = "none"
+            document.getElementById("real-time-container").style.display = "block"
+        }
+    })
+})
+
+
 // saving the paper text
 function savePaperText() {
     fetch("/editor/save", {
@@ -165,3 +186,4 @@ document.getElementById("save-btn").addEventListener("click", () => {
     savePaperText()
     window.location.replace("http://localhost/editor/overview")
 })
+

@@ -29,6 +29,12 @@ main {
     justify-content: left;
 }
 
+.title-paper-types {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem;   
+}
+
 textarea {
     background-color: red;
     height: 65vh;
@@ -45,8 +51,9 @@ textarea {
 }
 
 .paper-results {
-    height: 80%;
+    height: 60%;
     overflow-y: scroll;
+    margin: 2rem;
 }
 
 .suitable-paper {
@@ -164,5 +171,74 @@ h1 {
 }
 
 #actual-form {
+    display: none;
+}
+
+.ad {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    background-color: #38592C;
+    padding: 1.5rem;
+    border-radius: 10px;
+    color: white;
+    margin: 2rem;
+}
+
+.ad h3 {
+    padding: 0 0 2rem 0;
+}
+
+.ad .prim-btn {
+    background-color: white;
+    color: #6D6D6D;
+}
+
+.results-with-ad {
+    margin: 2rem;
+}
+
+.paper-cats-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.paper-cat {
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.paper-cat::before {
+    content: "";
+    position: absolute;
+    width: 12.5%;
+    height: 2px;
+    background-color: #3D6C8D;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all .2s ease-out;
+}
+
+.paper-cat:hover::before {
+    width: 25%;
+}
+
+.selected-paper-cat {
+    position: relative;
+}
+
+.selected-paper-cat::before {
+    content: "";
+    position: absolute;
+    width: 25%;
+    height: 2px;
+    background-color: #3D6C8D;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#saved-papers-container {
     display: none;
 }
