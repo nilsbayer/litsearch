@@ -1,9 +1,9 @@
 // Process search based on last sentences
 
-const paperText = document.getElementById("paper-text")
+const paperText = document.getElementById("paper_text")
 const paperResultsContainer = document.querySelector(".paper-results")
 
-// paperText.innerHTML = paperText.innerHTML
+// paperText.innerText = paperText.value
 
 let paperToken_array = location.href.split("/")
 document.getElementById("paper_token").value = paperToken_array[paperToken_array.length -1]
@@ -20,9 +20,6 @@ function get_references() {
     if (currentSetenceArray.length > 1) {
         var last2SentencesArray = currentSetenceArray[currentSetenceArray.length -2, currentSetenceArray.length -1]
     }
-
-    currentSetence.replace("&nbsp;", "")
-    last2SentencesArray.replace("&nbsp;", "")
 
     if (currentSetence !== " " || currentSetence !== "") {
         // Passing data for text to analyse to server and getting back references
@@ -80,9 +77,9 @@ function get_references() {
 var timeOut;
 var interval_for_request = 1000;
 
-window.addEventListener("keyup", () => {
+paperText.addEventListener("keyup", () => {
     clearTimeout(timeOut);
-    if (paperText) {
+    if (paperText.value) {
         timeOut = setTimeout(get_references, interval_for_request);
     }
 })
@@ -112,12 +109,12 @@ window.addEventListener("click", (e) => {
         let lastPeriodIndex = -1;
         let match;
 
-        while ((match = regex.exec(paperText.innerHTML)) !== null) {
+        while ((match = regex.exec(paperText.value)) !== null) {
             lastPeriodIndex = match.index;
         }
 
         ref_insertion = " (" + selected_ref + ")"
-        paperText.innerHTML = paperText.innerHTML.slice(0, lastPeriodIndex) + ref_insertion + paperText.innerHTML.slice(lastPeriodIndex)
+        paperText.value = paperText.value.slice(0, lastPeriodIndex) + ref_insertion + paperText.value.slice(lastPeriodIndex)
     }
 })
 
@@ -126,7 +123,7 @@ function savePaperText() {
     fetch("/editor/save", {
         method: "POST",
         body: JSON.stringify({
-            "paper_text": paperText.innerHTML,
+            "paper_text": paperText.value,
             "paper_token": document.getElementById("paper_token").value
         }),
         headers: {
@@ -156,7 +153,7 @@ setInterval(() => {
 }, 30000)
 
 window.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey && e.key === "s") || (e.metaKey && e.key === "s")) {
+    if (e.ctrlKey && e.key === "s" || e.metaKey && e.key === "s") {
         savePaperText()
     }
 })

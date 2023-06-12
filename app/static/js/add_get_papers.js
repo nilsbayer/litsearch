@@ -6,6 +6,7 @@ const savedPaperDiv = document.getElementById("saved-paper-div")
 window.addEventListener("click", (e) => {
 
     if (e.target.classList.contains("select-paper")) {
+        notify_user("Saving in process", "success")
         // console.log(e.target.parentElement.parentElement.parentElement.querySelector("span").innerText)
         fetch("/add-paper-to-project", {
             method: "POST",
@@ -26,8 +27,8 @@ window.addEventListener("click", (e) => {
                     <span>${data.saved_paper.title}</span>
                     <div class="icon-container">
                         <svg class="deselect-paper" width="20" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="2" y="2" width="32" height="32" rx="16" stroke="#3D6C8D" stroke-width="4"/>
-                            <rect x="10.3809" y="19.4356" width="3.09202" height="15.4601" rx="1.54601" transform="rotate(-90 10.3809 19.4356)" fill="#3D6C8D"/>
+                            <rect style="pointer-events: none;" x="2" y="2" width="32" height="32" rx="16" stroke="#3D6C8D" stroke-width="4"/>
+                            <rect style="pointer-events: none;" x="10.3809" y="19.4356" width="3.09202" height="15.4601" rx="1.54601" transform="rotate(-90 10.3809 19.4356)" fill="#3D6C8D"/>
                         </svg>
                         <a href="${data.link}">
                             <svg width="16" height="30" viewBox="0 0 20 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -45,6 +46,31 @@ window.addEventListener("click", (e) => {
                     if (data.reason) {
                         notify_user(data.reason, "error")
                     }
+                }
+            })
+        })
+    }
+
+    if (e.target.classList.contains("deselect-paper")) {
+        notify_user("Removing in process", "success")
+        fetch("/remove-paper-to-project", {
+            method: "POST",
+            body: JSON.stringify({
+                "paper_name": e.target.parentElement.parentElement.parentElement.querySelector("span").innerText,
+                "project_token": project_token1
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => {
+            response.json().then(data => {
+                if (data.message === "success") {
+                    e.target.parentElement.parentElement.remove()
+                    notify_user(data.reason, "success")
+                }
+                else {
+                    notify_user("Something went wrong.", "error")
                 }
             })
         })

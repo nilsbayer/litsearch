@@ -17,6 +17,7 @@ from time import perf_counter
 import json
 from pymongo import MongoClient
 from datetime import datetime
+from chromadb.utils import embedding_functions
 
 if not os.path.exists(os.path.join("pdfs")):
     os.mkdir("pdfs")
@@ -34,15 +35,16 @@ persist_directory = "sentence_chromadb"
 client = chromadb.Client(
     Settings(
         persist_directory=persist_directory,
-        chroma_db_impl="duckdb+parquet",
+        chroma_db_impl="duckdb+parquet"
     )
 )
 print("************************ Chromadb", client.heartbeat())
 
 # Create a new chroma collection
 collection_name = "sentence_emb_1"
+sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
 # Load the collection
-collection = client.get_collection(collection_name)
+collection = client.get_collection(collection_name, embedding_function=sentence_transformer_ef)
 print("************************ Chromadb collection", collection)
 
 
@@ -774,17 +776,21 @@ def analyse_editor_text():
         for i in range(10):
             id_for_paragraph = results.get("ids")[0][i]
             authors = json.loads(results.get("metadatas")[0][i].get("authors"))
-            if len(authors) == 1:
-                authors = authors[0]
-            else:
-                authors = authors[0] + " et. al."
+            print("**********************", authors)
+            try:
+                if len(authors) == 1:
+                    authors = authors[0]
+                else:
+                    authors = authors[0] + " et. al."
+            except:
+                pass
             year = results.get("metadatas")[0][i].get("publication_year")
             title = results.get("metadatas")[0][i].get("title")
             before, actual_found, paragraph = get_paragraph(id_for_paragraph)
             _ = {
                 "paragraph": before + ". " + actual_found + ". " + paragraph,
                 "title": title,
-                "auth_year": authors + ", " + str(year)
+                "auth_year": str(authors) + ", " + str(year)
             }
             results_to_show.append(_)
 
@@ -888,6 +894,63 @@ def add_paper_to_project():
                 "message": "error, update went wrong"
             })
 
+    return jsonify({
+        "message": "error"
+    })
+
+@app.route("/remove-paper-to-project", methods=["POST"])
+def remove_paper_to_project():
+    if "email" not in session:
+        abort(403)
+
+    if request.method == "POST":
+        paper_name = request.get_json().get("paper_name")
+        project_token = request.get_json().get("project_token")
+
+        results = collection.query(
+            query_texts="test",
+            where={
+                "title": paper_name
+            }
+        )
+
+        # Check whether paper name was modified in the front end
+        if len(results["documents"][0]) == 0:
+            return jsonify({
+                "message": "error, no such paper"
+            })
+
+        # Entry for MongoDB
+        saved_paper_entry = {
+            "title": paper_name,
+            "token": None,
+            "summary": None,
+            "paragraph": None
+        }
+
+        user = users_col.find_one(
+            {
+                "email": session["email"]
+            }
+        )
+        users_projects = user.get("projects")
+        if len(users_projects) > 0:
+            for project in users_projects:
+                if project.get("token") == project_token:
+                    if len(project.get("saved_papers") )> 0:
+                        for saved in project.get("saved_papers"):
+                            if saved.get("title") == paper_name:
+                                users_col.update_one(
+                                    {
+                                        "email": session["email"],
+                                        "projects": {"$elemMatch": {"token": project_token}}
+                                    },
+                                    {"$pull": {"projects.$.saved_papers": saved_paper_entry}}
+                                )
+                                return jsonify({
+                                    "message": "success",
+                                    "reason": "Paper was successfuly removed."
+                                })
     return jsonify({
         "message": "error"
     })

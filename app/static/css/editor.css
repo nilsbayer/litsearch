@@ -17,6 +17,10 @@ border-radius: 5px;
 background-color: grey; 
 }
 
+/* header {
+    position: fixed;
+} */
+
 main {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -30,6 +34,7 @@ textarea {
     height: 65vh;
     z-index: 0;
     padding: 1rem 1rem 1rem 0;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .papers-actions {
@@ -47,9 +52,10 @@ textarea {
 .suitable-paper {
     padding: 1rem 1rem;
     margin-bottom: 1rem;
-    border: 1px solid lightgrey;
+    /* border: 1px solid lightgrey; */
     border-radius: 5px;
     cursor: pointer;
+    background-color: rgba(224, 224, 224, 0.38);
     /* transform: translateY(50vw);
     transition: transform .5s;
     animation: swiff-in .5s ease-in; */
@@ -149,4 +155,14 @@ textarea {
 h1 {
     font-size: 1.4rem;
     transform: translateY(-1rem);
+    padding-bottom: 2rem;
+    position: relative;
+}
+
+[contentEditable]:focus {
+    outline: none;
+}
+
+#actual-form {
+    display: none;
 }
