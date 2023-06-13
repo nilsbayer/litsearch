@@ -19,7 +19,7 @@ from pymongo import MongoClient
 from datetime import datetime
 from chromadb.utils import embedding_functions
 
-if not os.path.exists(os.path.join("pdfs")):
+if not os.path.exists(os.path.join("pdfs")): 
     os.mkdir("pdfs")
 
 app = Flask(__name__, static_url_path="/")
