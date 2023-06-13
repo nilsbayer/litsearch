@@ -59,6 +59,7 @@ mongo_client = MongoClient(DB_URI)
 #           authSource="admin")    
 mongo_db = mongo_client.get_database("users")
 users_col = mongo_db["users"]
+summaries_col = mongo_db["summaries"]
 
 # sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -501,6 +502,22 @@ def get_paper(paper_token):
     else:
         logged_in=False
 
+    res = summaries_col.find_one(
+        {"token": paper_token}
+    )
+    if res == None:
+        abort(404)
+
+    authors = ", ".join(res.get("authors"))
+    citation = authors + ", " + str(res.get("year")) + ", " + res.get("title") + ", " + res.get("journal")
+    url = res.get("url").replace("https://", "")
+    domain = url.split("/")[0]
+
+    res.update({
+        "pdf_provider": domain,
+        "APA_citation": citation
+    })
+
     paper = {
         "title": "Attention is all you need",
         "summary": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo? Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit officiis veniam voluptatem culpa earum, deserunt rem quibusdam ab, obcaecati unde ea sequi. Autem, illo! Tenetur a omnis placeat repellat nemo",
@@ -515,7 +532,7 @@ def get_paper(paper_token):
         "link_pdf": "https://arxiv.org/pdf/1706.03762.pdf",
         "pdf_provider": "arxiv.org"
     }
-    return render_template("paper.html", paper=paper, search_available=True, logged_in=logged_in)
+    return render_template("paper.html", paper=res, search_available=True, logged_in=logged_in)
 
 @app.route("/editor/<string:paper_token>")
 def editor(paper_token):
