@@ -565,12 +565,12 @@ def editor(paper_token):
                     if user_project.get("token") == connected_project:
                         paper.update({"saved_papers": user_project.get("saved_papers")})
 
-            return render_template("editor.html", paper=this_project, form=form, search_available=True, logged_in=logged_in)
+            return render_template("editor_real.html", paper=this_project, form=form, search_available=True, logged_in=logged_in)
 
     else:
         logged_in = False
     
-    return render_template("editor.html", form=form, search_available=True, logged_in=logged_in)
+    return render_template("editor_real.html", form=form, search_available=True, logged_in=logged_in)
 
 
 "*****************************************                  POST REQUESTS                *******************************************************"

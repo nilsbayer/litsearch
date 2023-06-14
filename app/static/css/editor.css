@@ -39,7 +39,7 @@ textarea {
     background-color: red;
     height: 65vh;
     z-index: 0;
-    padding: 1rem 1rem 1rem 0;
+    padding: 2,5rem 2rem;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
 }
 

@@ -13,7 +13,7 @@ paperText.focus()
 function get_references() {
     console.log("Sent request")
     // Generating variables to pass to server
-    let currentText = paperText.innerHTML
+    let currentText = paperText.value
     let currentSetenceArray = currentText.split(".")                                        // ALSO SPLIT FOR ! and ?
     console.log(currentSetenceArray)
     let currentSetence = currentSetenceArray[currentSetenceArray.length -1]
@@ -117,6 +117,25 @@ window.addEventListener("click", (e) => {
         paperText.value = paperText.value.slice(0, lastPeriodIndex) + ref_insertion + paperText.value.slice(lastPeriodIndex)
     }
 })
+
+// Change the selected paper category: saved from project or real-time search
+const paperCats = document.querySelectorAll(".paper-cat")
+paperCats.forEach(paperCat => {
+    paperCat.addEventListener("click", (e) => {
+        paperCats.forEach(cat => {
+            cat.classList.toggle("selected-paper-cat")
+        })
+        if (document.querySelector(".selected-paper-cat") === document.getElementById("saved-lister")) {
+            document.getElementById("saved-papers-container").style.display = "block"
+            document.getElementById("real-time-container").style.display = "none"
+        }
+        else if (document.querySelector(".selected-paper-cat") === document.getElementById("real-time-searcher")) {
+            document.getElementById("saved-papers-container").style.display = "none"
+            document.getElementById("real-time-container").style.display = "block"
+        }
+    })
+})
+
 
 // saving the paper text
 function savePaperText() {
