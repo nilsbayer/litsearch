@@ -242,3 +242,7 @@ h1 {
 #saved-papers-container {
     display: none;
 }
+
+#auto-save {
+    color: #025E00;
+}

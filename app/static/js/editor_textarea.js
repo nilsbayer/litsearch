@@ -21,7 +21,8 @@ function get_references() {
         var last2SentencesArray = currentSetenceArray[currentSetenceArray.length -2, currentSetenceArray.length -1]
     }
 
-    if (currentSetence !== " " || currentSetence !== "") {
+    currentSetence = currentSetence.trim()
+    if (currentSetence.length > 0) {
         // Passing data for text to analyse to server and getting back references
         fetch("/analyse-editor-text", {
             method: "POST",
@@ -181,3 +182,9 @@ document.getElementById("save-btn").addEventListener("click", () => {
     savePaperText()
     window.location.replace("http://localhost/editor/overview")
 })
+
+
+
+// paperText.addEventListener("keyup", (e) => {
+//     console.log(e.target.selectionStart)
+// })
