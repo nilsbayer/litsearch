@@ -66,7 +66,7 @@ window.addEventListener("click", (e) => {
         .then(response => {
             response.json().then(data => {
                 if (data.message === "success") {
-                    e.target.parentElement.parentElement.remove()
+                    e.target.parentElement.parentElement.parentElement.remove()
                     notify_user(data.reason, "success")
                 }
                 else {

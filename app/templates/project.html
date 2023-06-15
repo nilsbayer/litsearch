@@ -41,6 +41,7 @@
     <div class="left-part">
         <h3 class="big-margin">Interesting papers that we found for you</h3>
         <div>
+            <div id="found-paper-container">
             {% for paper in project.found_papers[:4]  %}
                 <div class="found-paper">
                     <span>{{ paper.title }}</span>
@@ -58,6 +59,7 @@
                     </div>
                 </div>
             {% endfor %}
+            </div>
             <div id="further-papers">
             {% for paper in project.found_papers[4:] %}
                 <div class="found-paper">

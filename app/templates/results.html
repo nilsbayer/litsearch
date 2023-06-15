@@ -7,7 +7,7 @@
 {% block dynamic_content %}
     <main>
         {% for result in results %}
-            <a style="text-decoration: none;" href=""><div class="paper-result">
+            <a style="text-decoration: none;" href="http://localhost/paper/{{ result.token }}"><div class="paper-result">
                 <p>
                     {{ result.before_text }}. <b>{{ result.found_text }}.</b> {{ result.after_text }}
                 </p>

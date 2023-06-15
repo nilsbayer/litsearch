@@ -172,6 +172,19 @@ def index():
                 "title": title
             }
             results_to_show.append(_)
+
+        for result in results_to_show:
+            current_res = summaries_col.find_one(
+                {"title": result.get("title")}
+            )
+            if current_res != None:
+                current_token = current_res.get("token")
+                result.update({
+                    "token": current_token
+                })
+            result.update({
+                "token": None
+            })
         
         print("****************** Results ready to show in", perf_counter() - start_time, "*******************")
 
@@ -766,7 +779,8 @@ def update_project_desc():
                     {
                         "message": "OK",
                         "new_desc": new_desc,
-                        "notification": "Description updated successfully."
+                        "notification": "Description updated successfully.",
+                        "new_results": results_to_show
                     }
                 )
             except:
