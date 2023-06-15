@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_paper.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/paper.css') }}">
 <script src="{{ url_for('static', filename='js/copy.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/add_paper_to_project.js') }}" defer></script>
 {% endblock extended_head %}
 
 {% block dynamic_content %}
@@ -25,7 +26,7 @@
             <p id="summary">
                 {{ paper.summary }}
             </p>
-            <span style="margin-top: 1rem; display:block" class="sec-btn">Add to a project</span>
+            <span id="add-paper-btn" style="margin-top: 1rem; display:block" class="sec-btn">Add to a project</span>
             <div class="h3-container">
                 <h3>Cite this paper</h3>
                 <svg class="copy-icon" id="copy-citation" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -53,4 +54,17 @@
             <div><a target="_blank" href="{{ paper.url }}" class="sec-btn">Open PDF from {{ paper.pdf_provider }}</a></div>
         </div>
     </main>
+
+    {% if logged_in  %}
+    <div class="overlay">
+        <div class="project-window">
+            <h3>Choose project</h3>
+            <div class="project-holder">
+                {% for project in projects %}
+                    <div class="project-box" data-token="{{ project.token }}"><span>{{ project.title }}</span></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 {% endblock dynamic_content %}

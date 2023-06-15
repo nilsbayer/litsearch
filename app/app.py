@@ -182,9 +182,10 @@ def index():
                 result.update({
                     "token": current_token
                 })
-            result.update({
-                "token": None
-            })
+            else:
+                result.update({
+                    "token": None
+                })
         
         print("****************** Results ready to show in", perf_counter() - start_time, "*******************")
 
@@ -545,7 +546,23 @@ def get_paper(paper_token):
         "link_pdf": "https://arxiv.org/pdf/1706.03762.pdf",
         "pdf_provider": "arxiv.org"
     }
-    return render_template("paper.html", paper=res, search_available=True, logged_in=logged_in)
+
+    current_user = users_col.find_one(
+        {"email": session["email"]}
+    )
+
+    projects = []
+    for project in current_user.get("projects"):
+        _ = {
+            "title": project.get("project_name"),
+            "token": project.get("token")
+        }
+        projects.append(_)
+
+    if logged_in == False:
+        return render_template("paper.html", paper=res, search_available=True, logged_in=logged_in)
+    else:
+        return render_template("paper.html", projects=projects,  paper=res, search_available=True, logged_in=logged_in)
 
 @app.route("/editor/<string:paper_token>")
 def editor(paper_token):
@@ -982,7 +999,7 @@ def remove_paper_to_project():
                                         "email": session["email"],
                                         "projects": {"$elemMatch": {"token": project_token}}
                                     },
-                                    {"$pull": {"projects.$.saved_papers": saved_paper_entry}}
+                                    {"$pull": {"projects.$.saved_papers": saved}}
                                 )
                                 return jsonify({
                                     "message": "success",
@@ -991,3 +1008,64 @@ def remove_paper_to_project():
     return jsonify({
         "message": "error"
     })
+
+@app.route("/paper-to-project", methods=["POST"])
+def add_paper_from_paper_page_to_project():
+    if "email" not in session:
+        abort(403)
+
+    if request.method == "POST":
+        paper_token = request.get_json().get("paper_token")
+        project_token = request.get_json().get("project_token")
+
+        res = summaries_col.find_one(
+            {"token": paper_token}
+        )
+        if res == None:
+            return jsonify({
+                "message": "error, no such paper"
+            })
+        res_title = res.get("title")
+
+        # Check whether paper exists in database
+        results = collection.query(
+            query_texts="test",
+            where={
+                "title": res_title
+            }
+        )
+
+        # Check whether paper name was modified in the front end
+        if len(results["documents"][0]) == 0:
+            return jsonify({
+                "message": "error, no such paper"
+            })
+
+        # Update user's project saved papers
+        paper_data = {
+            "title": res_title,
+            "token": paper_token,
+            "summary": res.get("summary"),
+            "paragraph": None
+        }
+
+        project_check = users_col.find_one({
+            "email": session["email"],
+            "projects": {"$elemMatch": {"token": project_token}}
+        })
+        if project_check == None:
+            return jsonify({
+                "message": "error, no such project"
+            })
+
+        users_col.update_one(
+            {
+                "email": session["email"],
+                "projects": {"$elemMatch": {"token": project_token}}
+            },
+            {"$push": {"projects.$.saved_papers": paper_data}}
+        )
+
+        return jsonify({
+            "message": "success"
+        })

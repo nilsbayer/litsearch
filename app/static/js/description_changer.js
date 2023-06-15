@@ -39,7 +39,7 @@ change_icons.forEach(change_icon => {
                         document.getElementById("edit-svg").parentElement.setAttribute("data-tooltip", "Edit")
                         notify_user(data.notification, "success")
                         document.getElementById("found-paper-container").innerHTML = ""
-                        data.new_results.slice(0,3).forEach(new_result => {
+                        data.new_results.slice(0,4).forEach(new_result => {
                             let newDiv = document.createElement("div")
                             newDiv.classList.add("found-paper")
                             newDiv.innerHTML = `
@@ -60,7 +60,7 @@ change_icons.forEach(change_icon => {
                             document.getElementById("found-paper-container").append(newDiv)
                         })
                         document.getElementById("further-papers").innerHTML = ""
-                        data.new_results.slice(3).forEach(new_result => {
+                        data.new_results.slice(4).forEach(new_result => {
                             let newDiv = document.createElement("div")
                             newDiv.classList.add("found-paper")
                             newDiv.innerHTML = `
