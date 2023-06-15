@@ -214,7 +214,7 @@ h1 {
     width: 12.5%;
     height: 2px;
     background-color: #3D6C8D;
-    bottom: 0;
+    bottom: -100%;
     left: 50%;
     transform: translateX(-50%);
     transition: all .2s ease-out;
@@ -234,7 +234,7 @@ h1 {
     width: 25%;
     height: 2px;
     background-color: #3D6C8D;
-    bottom: 0;
+    bottom: -100%;
     left: 50%;
     transform: translateX(-50%);
 }

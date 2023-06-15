@@ -1081,3 +1081,30 @@ def add_paper_from_paper_page_to_project():
         return jsonify({
             "message": "success"
         })
+
+@app.route("/get-summary", methods=["POST"])
+def receive_summary():
+    if "email" not in session:
+        abort(403)
+
+    if request.method == "POST":
+        paper_name = request.get_json().get("paper_name")
+
+        res = summaries_col.find_one(
+            {"title": paper_name}
+        )
+        if res == None:
+            return jsonify({
+                "message": "Error, no summary found."
+            })
+        return jsonify(
+            {
+                "message": "success",
+                "summary": res.get("summary")
+            }
+        )
+        
+    else:
+        return jsonify({
+            "message": "Something went wrong"
+        })

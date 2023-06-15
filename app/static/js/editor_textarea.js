@@ -242,8 +242,39 @@ window.addEventListener("keyup", (e) => {
     }
 })
 
+paperText.style.height = window.innerHeight - paperText.getBoundingClientRect().top +"px"
+
+
+document.getElementById("saved-lister").style.color = "#c3c3c3"
+
 // Change the selected paper category: saved from project or real-time search
 const paperCats = document.querySelectorAll(".paper-cat")
+
+let current_top = paperCats[0].getBoundingClientRect().top
+let current_left = paperCats[0].getBoundingClientRect().left
+
+let current_top1 = paperCats[1].getBoundingClientRect().top
+let current_left1 = paperCats[1].getBoundingClientRect().left
+console.log("0:", current_top, current_left, "1:", current_top1, current_left1)
+paperCats[0].style.position = "fixed"
+paperCats[0].style.top = current_top + "px"
+paperCats[0].style.left = current_left + "px"
+paperCats[1].style.position = "fixed"
+paperCats[1].style.top = current_top1 + "px"
+paperCats[1].style.left = current_left1 + "px"
+
+// let h1_top = document.querySelector("h1").getBoundingClientRect().top
+// let h1_left = document.querySelector("h1").getBoundingClientRect().left
+// document.querySelector("h1").style.position = "fixed"
+// document.querySelector("h1").style.top = h1_top+ "px"
+// document.querySelector("h1").style.position = h1_left+ "px"
+
+let svg_top = document.querySelector(".top-right-svg").parentElement.getBoundingClientRect().top
+let svg_left = document.querySelector(".top-right-svg").parentElement.getBoundingClientRect().left
+document.querySelector(".top-right-svg").style.position = "fixed"
+document.querySelector(".top-right-svg").style.top = svg_top + "px"
+document.querySelector(".top-right-svg").style.position = svg_left + "px"
+
 paperCats.forEach(paperCat => {
     paperCat.addEventListener("click", (e) => {
         paperCats.forEach(cat => {
@@ -252,10 +283,14 @@ paperCats.forEach(paperCat => {
         if (document.querySelector(".selected-paper-cat") === document.getElementById("saved-lister")) {
             document.getElementById("saved-papers-container").style.display = "block"
             document.getElementById("real-time-container").style.display = "none"
+            document.getElementById("real-time-searcher").style.color = "#c3c3c3"
+            document.getElementById("saved-lister").style.color = "black"
         }
         else if (document.querySelector(".selected-paper-cat") === document.getElementById("real-time-searcher")) {
             document.getElementById("saved-papers-container").style.display = "none"
             document.getElementById("real-time-container").style.display = "block"
+            document.getElementById("saved-lister").style.color = "#c3c3c3"
+            document.getElementById("real-time-searcher").style.color = "black"
         }
     })
 })
