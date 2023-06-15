@@ -73,6 +73,12 @@ window.addEventListener("click", (e) => {
 window.addEventListener("click", (e) => {
     if (e.target.classList.contains("search-again")) {
         // redirect to search with input
-        location.href = `http://localhost:5000/?search=${searchBar.value}`
-    }
+        let current_domain = (new URL(location.href)).hostname
+        if (current_domain === "localhost") {
+            location.href = `http://localhost/?search=${searchBar.value}`
+        }
+        else {
+            location.href = "http://" + current_domain + `/?search=${searchBar.value}`
+        }
+    }   
 })

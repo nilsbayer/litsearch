@@ -127,12 +127,12 @@ textarea {
     }
 }
 
-[data-tooltip] {
+[data-tooltip], [data-tooltip-right] {
     --scale: 0;
     position: relative;
 }
 
-[data-tooltip]::after {
+[data-tooltip]::after, [data-tooltip-right]::after {
     content: attr(data-tooltip);
     top: 150%;
     left: 50%;
@@ -150,7 +150,14 @@ textarea {
     z-index: 20;
 }
 
-[data-tooltip]:hover::after {
+[data-tooltip-right]::after {
+    content: attr(data-tooltip-right);
+    top: 50%;
+    left: 200%;
+    transform: translateY(-50%);
+}
+
+[data-tooltip]:hover::after, [data-tooltip-right]:hover::after {
     --scale: 1;
 }
 

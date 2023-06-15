@@ -26,6 +26,7 @@ app = Flask(__name__, static_url_path="/")
 
 load_dotenv(find_dotenv())
 app.config["SECRET_KEY"] = os.getenv("APP_PWD")
+domain_string = os.getenv("DOMAIN")
 
 bcrypt = Bcrypt(app)
 
@@ -189,7 +190,7 @@ def index():
         
         print("****************** Results ready to show in", perf_counter() - start_time, "*******************")
 
-        return render_template("results.html", results=results_to_show, logged_in=True)
+        return render_template("results.html", domain_string=domain_string, results=results_to_show, logged_in=True)
     else:
         return render_template("index.html", form=form, recent_projects=recent_projects, logged_in=log_status)
 
@@ -690,19 +691,30 @@ def find_n_largest(list_item, n):
 @app.route("/search", methods=["POST"])
 def search():
     if request.method == "POST":
-        emb_search = sbert_model.encode(request.get_json().get("current_search"))
-        emb_results = sbert_model.encode(topics_and_papers)
+        # emb_search = sbert_model.encode(request.get_json().get("current_search"))
+        # emb_results = sbert_model.encode(topics_and_papers)
 
-        cos_sim = util.cos_sim(emb_search, emb_results).tolist()[0]
-        results_to_send = []
-        for x in find_n_largest(cos_sim, 5):
-            if topics_and_papers[x] in topics:
-                _ = {"item": topics_and_papers[x], "type": "topic"}
-            elif topics_and_papers[x] in papers:
-                _ = {"item": topics_and_papers[x], "type": "paper"}
+        # cos_sim = util.cos_sim(emb_search, emb_results).tolist()[0]
+        # results_to_send = []
+        # for x in find_n_largest(cos_sim, 5):
+        #     if topics_and_papers[x] in topics:
+        #         _ = {"item": topics_and_papers[x], "type": "topic"}
+        #     elif topics_and_papers[x] in papers:
+        #         _ = {"item": topics_and_papers[x], "type": "paper"}
             
-            if _ not in results_to_send:
-                results_to_send.append(_)
+        #     if _ not in results_to_send:
+        #         results_to_send.append(_)
+
+        results_to_send = [
+            {
+                "item": "Test Paper",
+                "type": "paper"
+            },
+            {
+                "item": "Test Paper 2",
+                "type": "paper"
+            }
+        ]
 
         return jsonify(results_to_send)
 

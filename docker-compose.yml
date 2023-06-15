@@ -13,6 +13,7 @@ services:
       - APP_PWD=passwort1!
       # - DB_URI=mongodb://username:pwd123@localhost:27017/?authMechanism=DEFAULT
       - DB_URI=mongodb://root:pass@test_mongodb:27017/
+      - DOMAIN=http://localhost
     #   - DB_URL=postgresql://postgres:postgres@flask_db:5432/postgres
     command: gunicorn -w 3 -b 0.0.0.0:8000 wsgi:app
     networks:

@@ -246,3 +246,13 @@ h1 {
 #auto-save {
     color: #025E00;
 }
+
+.recent-project-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#overview-title {
+    font-size: 2rem;
+}

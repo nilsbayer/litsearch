@@ -303,7 +303,14 @@ window.addEventListener("keydown", (e) => {
 
 document.getElementById("save-btn").addEventListener("click", () => {
     savePaperText()
-    window.location.replace("http://localhost/editor/overview")
+    let current_domain = (new URL(location.href)).hostname
+    if (current_domain === "localhost") {
+        window.location.replace("http://localhost/editor/overview")
+    }
+    else {
+        window.location.replace("http://" + current_domain + "/editor/overview")
+    }
+    
 })
 
 
