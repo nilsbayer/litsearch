@@ -256,3 +256,28 @@ h1 {
 #overview-title {
     font-size: 2rem;
 }
+
+.overlay {
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(61, 108, 141, .6);
+    backdrop-filter: blur(2px);
+    justify-content: center;
+    align-items: center;
+    display: none;
+}
+
+.project-window {
+    background-color: white;
+    border-radius: 10px;
+    width: 60vw;
+    padding: 1rem 2rem 2rem 2rem;
+}
+
+#summary-title {
+    margin-bottom: 2rem;
+}
