@@ -523,8 +523,9 @@ def get_paper(paper_token):
     if res == None:
         abort(404)
 
-    authors = ", ".join(res.get("authors"))
-    citation = authors + ", " + str(res.get("year")) + ", " + res.get("title") + ", " + res.get("journal")
+    authors = json.loads(res.get("authors"))
+    authors = ", ".join(authors)
+    citation = authors + ", " + str(res.get("publication_year")) + ", " + res.get("title") + ", " + res.get("journal_name")
     url = res.get("url").replace("https://", "")
     domain = url.split("/")[0]
 
