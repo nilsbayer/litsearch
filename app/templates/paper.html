@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/paper.css') }}">
 <script src="{{ url_for('static', filename='js/copy.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/add_paper_to_project.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/in_paper_search.js') }}" defer></script>
 {% endblock extended_head %}
 
 {% block dynamic_content %}
@@ -39,7 +40,7 @@
             <div id="loading-div">
                 <div class="loading-circle"></div>
             </div>
-            <p id="subject-result"></p>
+            <div id="subject-result-container"></div>
         </div>
         <div class="right-part">
             <h3>Identified topics</h3>

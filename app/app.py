@@ -1109,3 +1109,31 @@ def receive_summary():
         return jsonify({
             "message": "Something went wrong"
         })
+
+@app.route("/paper-search/find-relevant-paper", methods=["POST"])
+def in_paper_search():
+    if request.method == "POST":
+        users_query = request.get_json().get("users_query")
+        paper_name = request.get_json().get("paper_name")
+
+        found_parts = collection.query(
+            query_texts=users_query,
+            where={
+                "title": paper_name
+            },
+            n_results=4
+        )
+        results_to_send = []
+        for i in range(4):
+            current_id = found_parts.get("ids")[0][i]
+            before, actual_found, paragraph = get_paragraph(current_id)
+            _ = " ".join([before, actual_found, paragraph])
+            results_to_send.append(_)
+
+        return jsonify({
+            "message": "success",
+            "found_parts": results_to_send
+        })
+
+    else:
+        return jsonify({"message": "error"})
